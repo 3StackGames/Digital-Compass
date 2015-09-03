@@ -17,7 +17,6 @@ public class App
     	  //@Override
     	  public void call(Object... args) {
     	    socket.emit("foo", "hi");
-    	    socket.disconnect();
     	    System.out.println("connect");
     	  }
 
@@ -39,7 +38,7 @@ public class App
 
       	  //@Override
       	  public void call(Object... args) { 
-      		  System.out.println ("boop");
+      		  System.out.println (args[0]);
       	  }
 
       	});
