@@ -22,14 +22,14 @@ public class PhaseManager {
 
 			// @Override
 			public void call(Object... args) {
-				socket.emit("connected");
+				socket.emit("Backend Connected");
 			}
 
 		}).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
 
 			// @Override
 			public void call(Object... args) {
-				socket.emit("disconnected");
+				socket.emit("Backend Disconnected");
 			}
 
 		}).on("Initialize Game", new Emitter.Listener() {
@@ -39,10 +39,13 @@ public class PhaseManager {
 			public void call(Object... args) {
 				JSONObject details = new JSONObject(args[0]);
 				try {
+					System.out.println(args[0]);
 					createGame(details);
-					socket.emit("Game created");
+					socket.emit("Game Created");
+					System.out.println("success");
 				} catch (JSONException e) {
-					socket.emit("Invalid json",args);
+					socket.emit("Invalid JSON",args);
+					System.out.println("fail");
 				}
 			}
 
