@@ -21,9 +21,12 @@ public abstract class GameState {
 		this.currentAction = currentAction;
 	}
 
+	// TODO: @HyunbinTodo: What properties should be in GameState vs AGameState?
+	/*
 	public Player[] getPlayers() {
 		return players;
 	}
+	*/
 
 	public void setPlayers(Player[] players) {
 		this.players = players;

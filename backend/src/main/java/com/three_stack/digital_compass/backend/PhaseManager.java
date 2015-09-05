@@ -1,16 +1,20 @@
 package com.three_stack.digital_compass.backend;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import testGame.AGameState;
 import testGame.AInitialPhase;
 
 public class PhaseManager {
@@ -20,7 +24,6 @@ public class PhaseManager {
 	public static String BACKEND_DISCONNECTED = "Backend Disconnected";
 	public static String GAME_CREATED = "Game Created";
 	public static String INVALID_JSON = "Invalid Json";
-
 
 	public static void main(String[] args) throws URISyntaxException {
 		final Socket socket = IO.socket("http://192.168.0.109:3000");
@@ -59,14 +62,11 @@ public class PhaseManager {
 	}
 
 	private static void createGame(JSONObject details) throws JSONException {
-		String gameCode = details.getString("gameCode");
-		JSONArray players = details.getJSONArray("players");
-		Player[] playerList = new Player[players.length()];
-		for (int i = 0; i < players.length(); i++) {
-			JSONObject player = players.getJSONObject(i);
-			playerList[i] = new Player(player.getString("name"));
-		}
-		GameState state = new AInitialPhase().begin(playerList);
+		// TODO: @HyunbinTodo: taking toString() of JSONObject seems inefficient
+		AGameState gameState = new Gson().fromJson(details.toString(), AGameState.class);
+		String gameCode = gameState.getGameCode();
+		List<Player> players = gameState.getPlayers();
+		GameState state = new AInitialPhase().begin(players);
 		states.put(gameCode,state);
 	}
 }
