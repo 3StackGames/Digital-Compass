@@ -14,7 +14,14 @@ import org.json.JSONObject;
 import testGame.AInitialPhase;
 
 public class PhaseManager {
+
 	private static HashMap<String, GameState> states;
+
+	public static String BACKEND_CONNECTED = "Backend Connected";
+	public static String BACKEND_DISCONNECTED = "Backend Disconnected";
+	public static String GAME_CREATED = "Game Created";
+	public static String INVALID_JSON = "Invalid Json";
+
 
 	public static void main(String[] args) throws URISyntaxException {
 		final Socket socket = IO.socket("http://192.168.0.109:3000");
@@ -22,14 +29,14 @@ public class PhaseManager {
 
 			// @Override
 			public void call(Object... args) {
-				socket.emit("connected");
+				socket.emit(BACKEND_CONNECTED);
 			}
 
 		}).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
 
 			// @Override
 			public void call(Object... args) {
-				socket.emit("disconnected");
+				socket.emit(BACKEND_DISCONNECTED);
 			}
 
 		}).on("Initialize Game", new Emitter.Listener() {
@@ -37,12 +44,13 @@ public class PhaseManager {
 			
 			// @Override
 			public void call(Object... args) {
+				System.out.println(args[0]);
 				JSONObject details = new JSONObject(args[0]);
 				try {
 					createGame(details);
-					socket.emit("Game created");
+					socket.emit(GAME_CREATED);
 				} catch (JSONException e) {
-					socket.emit("Invalid json",args);
+					socket.emit(INVALID_JSON,args);
 				}
 			}
 
