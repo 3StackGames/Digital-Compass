@@ -14,7 +14,6 @@ import org.json.JSONObject;
 import testGame.AInitialPhase;
 
 public class PhaseManager {
-
 	private static HashMap<String, GameState> states;
 
 	public static String BACKEND_CONNECTED = "Backend Connected";
@@ -44,13 +43,15 @@ public class PhaseManager {
 			
 			// @Override
 			public void call(Object... args) {
-				System.out.println(args[0]);
 				JSONObject details = new JSONObject(args[0]);
 				try {
+					System.out.println(args[0]);
 					createGame(details);
 					socket.emit(GAME_CREATED);
+					System.out.println("success");
 				} catch (JSONException e) {
-					socket.emit(INVALID_JSON,args);
+					socket.emit(INVALID_JSON, args);
+					System.out.println("fail");
 				}
 			}
 
