@@ -14,7 +14,7 @@ import org.json.JSONObject;
 import testGame.AInitialPhase;
 
 public class PhaseManager {
-	private static HashMap<String, GameState> states;
+	private static HashMap<String, GameState> states = new HashMap<String, GameState>();
 
 	public static String BACKEND_CONNECTED = "Backend Connected";
 	public static String BACKEND_DISCONNECTED = "Backend Disconnected";
@@ -43,9 +43,8 @@ public class PhaseManager {
 			
 			// @Override
 			public void call(Object... args) {
-				JSONObject details = new JSONObject(args[0]);
 				try {
-					System.out.println(args[0]);
+					JSONObject details = (JSONObject) args[0];
 					createGame(details);
 					socket.emit(GAME_CREATED);
 					System.out.println("success");
@@ -61,10 +60,11 @@ public class PhaseManager {
 
 	private static void createGame(JSONObject details) throws JSONException {
 		String gameCode = details.getString("gameCode");
-		JSONArray players = new JSONArray(details.getJSONArray("players"));
+		JSONArray players = details.getJSONArray("players");
 		Player[] playerList = new Player[players.length()];
 		for (int i = 0; i < players.length(); i++) {
-			playerList[i] = new Player(players.getString(i));
+			JSONObject player = players.getJSONObject(i);
+			playerList[i] = new Player(player.getString("name"));
 		}
 		GameState state = new AInitialPhase().begin(playerList);
 		states.put(gameCode,state);
