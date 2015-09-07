@@ -44,6 +44,10 @@ public class PhaseManager {
 	
 	public static void main(String args[]) {
 		instance.main("http://192.168.0.109:3000");
+		/*instance.queueLock.lock();
+		instance.actionsToProcess.add(new JSONObject());
+		instance.queueSignal.signalAll();
+		instance.queueLock.unlock();*/
 	}
 
 	public void main(String URI) {
@@ -85,9 +89,11 @@ public class PhaseManager {
 		}).on(ACTION_EVENT, new Emitter.Listener() {;
 			
 			public void call(Object... args) {
+				queueLock.lock();
 				JSONObject action = (JSONObject) args[0];
 				actionsToProcess.add(action);
 				queueSignal.signalAll();
+				queueLock.unlock();
 			}
 		});
 		socket.connect();
@@ -135,6 +141,7 @@ public class PhaseManager {
 		public void run() {
 			while(!shutdown) {
 				try {
+					queueLock.lock();
 					while(actionsToProcess.isEmpty()) {
 						queueSignal.await();
 					}
@@ -144,7 +151,9 @@ public class PhaseManager {
 						newThread.start();
 						threads.add(newThread);
 					}
+					queueLock.unlock();
 					
+					//should change to notify
 					for(Thread t : threads) {
 						if (!t.isAlive()) {
 							t.join();
