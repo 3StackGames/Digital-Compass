@@ -1,5 +1,6 @@
 package com.three_stack.digital_compass.backend;
 
+import com.google.gson.Gson;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -18,6 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import testGame.AGameState;
 import testGame.AInitialPhase;
 
 public class PhaseManager {
@@ -108,8 +110,9 @@ public class PhaseManager {
 	}
 
 	private void createGame(JSONObject details) throws JSONException {
-		String gameCode = details.getString("gameCode");
-		GameState state = new AInitialPhase().begin(details);
+		AGameState gameState = new Gson().fromJson(details.toString(), AGameState.class);
+		String gameCode = gameState.getGameCode();
+		GameState state = new AInitialPhase().begin(gameState);
 		states.put(gameCode,state);
 	}
 	
