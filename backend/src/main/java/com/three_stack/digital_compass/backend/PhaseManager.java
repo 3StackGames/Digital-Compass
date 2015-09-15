@@ -43,11 +43,7 @@ public class PhaseManager {
 	private PhaseManager() { }
 	
 	public static void main(String args[]) {
-		instance.main("http://192.168.0.109:3000");
-		/*instance.queueLock.lock();
-		instance.actionsToProcess.add(new JSONObject());
-		instance.queueSignal.signalAll();
-		instance.queueLock.unlock();*/
+		instance.main("http://192.168.0.109:3000");	
 	}
 
 	public void main(String URI) {
@@ -129,7 +125,10 @@ public class PhaseManager {
 				String gameCode = details.getString("gameCode");
 				GameState state = states.get(gameCode);
 				if(state != null) {
+					System.out.println("thread running");
 					//process action through gamestate's current phase
+					//get gamestate
+					//socket.emit(gamestate)
 				}
 			} catch (JSONException e) {
 			}
