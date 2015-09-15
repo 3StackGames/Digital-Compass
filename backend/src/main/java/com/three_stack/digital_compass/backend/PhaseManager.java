@@ -37,8 +37,8 @@ public class PhaseManager {
 	public final String BACKEND_DISCONNECTED = "Backend Disconnected";
 	public final String GAME_CREATED = "Game Created";
 	public final String INVALID_JSON = "Invalid Json";
-	public final String INITIALIZE_EVENT = "Initialize Game";
-	public final String ACTION_EVENT = "Game Action";
+	public final String INITIALIZE_GAME = "Initialize Game";
+	public final String GAMEPAD_INPUT = "Gamepad Input";
 
 	private PhaseManager() { }
 	
@@ -67,7 +67,7 @@ public class PhaseManager {
 				socket.emit(BACKEND_DISCONNECTED);
 			}
 
-		}).on(INITIALIZE_EVENT, new Emitter.Listener() {
+		}).on(INITIALIZE_GAME, new Emitter.Listener() {
 			
 			// @Override
 			public void call(Object... args) {
@@ -75,6 +75,7 @@ public class PhaseManager {
 					JSONObject details = (JSONObject) args[0];
 					createGame(details);
 					socket.emit(GAME_CREATED);
+					socket.emit("State Update", "test");
 					System.out.println("success");
 				} catch (JSONException e) {
 					socket.emit(INVALID_JSON, args);
@@ -82,9 +83,10 @@ public class PhaseManager {
 				}
 			}
 
-		}).on(ACTION_EVENT, new Emitter.Listener() {;
+		}).on(GAMEPAD_INPUT, new Emitter.Listener() {;
 			
 			public void call(Object... args) {
+				System.out.println("received");
 				queueLock.lock();
 				JSONObject action = (JSONObject) args[0];
 				actionsToProcess.add(action);
@@ -129,6 +131,7 @@ public class PhaseManager {
 					//process action through gamestate's current phase
 					//get gamestate
 					//socket.emit(gamestate)
+					socket.emit("State Update", state.toString());
 				}
 			} catch (JSONException e) {
 			}
