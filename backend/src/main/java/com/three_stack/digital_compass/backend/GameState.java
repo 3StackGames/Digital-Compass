@@ -14,7 +14,11 @@ public abstract class GameState {
 	protected String gameCode;
 	@Expose
 	protected List<Player> players = new ArrayList<Player>();
-
+	
+	public GameState() {
+		
+	}
+	
 	public Phase getCurrentPhase() {
 		return currentPhase;
 	}
