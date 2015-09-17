@@ -7,6 +7,9 @@ public class Player {
 	@Expose
 	private String name;
 
+	@Expose
+	private int score;
+
 	/**
 	 *
 	 * @return
@@ -25,4 +28,21 @@ public class Player {
 		this.name = name;
 	}
 
+	/**
+	 *
+	 * @return
+	 * The score
+	 */
+	public int getScore() {
+		return score;
+	}
+
+	/**
+	 *
+	 * @param score
+	 * The score
+	 */
+	public void setScore(int score) {
+		this.score = score;
+	}
 }
