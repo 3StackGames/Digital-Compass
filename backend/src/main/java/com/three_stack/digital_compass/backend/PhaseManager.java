@@ -1,8 +1,11 @@
 package com.three_stack.digital_compass.backend;
 
+import com.google.gson.Gson;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -14,12 +17,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import testGame.AGameState;
-
-import com.google.gson.Gson;
 
 public class PhaseManager {
 	
