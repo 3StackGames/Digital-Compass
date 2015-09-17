@@ -11,4 +11,5 @@ public class InitialPhase extends Phase {
         state.setCurrentPhase(new InstructionPhase());
         return state;
 	}
+
 }
