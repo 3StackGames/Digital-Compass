@@ -18,8 +18,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class PhaseManager {
-	private static PhaseManager instance = new PhaseManager();
-
+	
     private Socket socket;
     private GameState initialState;
 	private Thread threadManager;
@@ -42,19 +41,20 @@ public class PhaseManager {
 	public PhaseManager() { }
 	
 	public static void main(String args[]) {
+		PhaseManager manager = new PhaseManager();
 		if(args.length == 0)
-			instance.connect("http://192.168.0.109:3000");
+			manager.connect("http://192.168.0.109:3000");
 		else 
-			instance.connect(args[0]);
+			manager.connect(args[0]);
 	}
 	
 	public void initialize(String URI, GameState defaultState) {
 		initialState = defaultState;
 		
 		if(URI == null) 
-			instance.connect("http://192.168.0.109:3000");
+			connect("http://192.168.0.109:3000");
 		else 
-			instance.connect(URI);
+			connect(URI);
 	}
 
 	public void connect(String URI) {
@@ -100,7 +100,7 @@ public class PhaseManager {
 		});
 		socket.connect();
 
-		threadManager = new Thread(instance.new ThreadManager());
+		threadManager = new Thread(new ThreadManager());
         threadManager.start();
 	}
 	
