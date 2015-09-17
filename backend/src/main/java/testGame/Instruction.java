@@ -13,4 +13,28 @@ public class Instruction {
         this.correctAnswerPointValue = correctAnswerPointValue;
         this.instructionText = instructionText;
     }
+
+    public int getTrickBonusPointValue() {
+        return trickBonusPointValue;
+    }
+
+    public void setTrickBonusPointValue(int trickBonusPointValue) {
+        this.trickBonusPointValue = trickBonusPointValue;
+    }
+
+    public int getCorrectAnswerPointValue() {
+        return correctAnswerPointValue;
+    }
+
+    public void setCorrectAnswerPointValue(int correctAnswerPointValue) {
+        this.correctAnswerPointValue = correctAnswerPointValue;
+    }
+
+    public String getInstructionText() {
+        return instructionText;
+    }
+
+    public void setInstructionText(String instructionText) {
+        this.instructionText = instructionText;
+    }
 }

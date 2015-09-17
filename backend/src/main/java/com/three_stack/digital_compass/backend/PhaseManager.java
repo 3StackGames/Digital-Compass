@@ -21,11 +21,14 @@ import testGame.AGameState;
 
 public class PhaseManager {
 	
+	public final int MAX_QUEUE_SIZE = 10000;
+	
     private Socket socket;
     private GameState initialState;
 	private Thread threadManager;
 	private Map<String, GameState> gameStates = new HashMap<String, GameState>();
-	private ArrayBlockingQueue<JSONObject> actionsToProcess = new ArrayBlockingQueue<JSONObject>(100000); //account for full queue?
+	private ArrayBlockingQueue<JSONObject> actionsToProcess = new ArrayBlockingQueue<JSONObject>(MAX_QUEUE_SIZE);
+	private boolean running = false;
 
     private HashSet<String> gamesBeingProcessed = new HashSet<String>();
     private ArrayList<Thread> threads = new ArrayList<Thread>();
@@ -39,8 +42,6 @@ public class PhaseManager {
 	public final String INITIALIZE_GAME = "Initialize Game";
 	public final String GAMEPAD_INPUT = "Gamepad Input";
 	public final String STATE_UPDATE = "State Update";
-
-	public PhaseManager() { }
 	
 	public static void main(String args[]) {
 		PhaseManager manager = new PhaseManager();
@@ -60,6 +61,8 @@ public class PhaseManager {
 	}
 
 	public void connect(String URI) {
+		running = true;
+		
 		try {
 			socket = IO.socket(URI);
 		}
@@ -97,7 +100,11 @@ public class PhaseManager {
 			
 			public void call(Object... args) {
 				JSONObject action = (JSONObject) args[0];
-				actionsToProcess.add(action);
+				try {
+					actionsToProcess.put(action);
+				} catch (InterruptedException e) {
+					System.out.println(e);
+				}
 			}
 		});
 		socket.connect();
@@ -107,25 +114,31 @@ public class PhaseManager {
 	}
 	
 	public void shutDown() throws InterruptedException {
-		threadManager.interrupt();
-		threadManager.join();
-		for(Thread t : threads) {
-			t.join();
+		if(running) {
+			threadManager.interrupt();
+			threadManager.join();
+			for(Thread t : threads) {
+				t.join();
+			}
+			socket.disconnect();
 		}
-		socket.disconnect();
 	}
 
 	private void createGame(JSONObject details) throws JSONException {
-		GameState gameState = new Gson().fromJson(details.toString(), AGameState.class);
-
-		//need to make this a deep copy in the future
-		GameState newState = initialState;
-		String gameCode = gameState.getGameCode();
-		initialState.setPlayers(gameState.getPlayers());
-		initialState.setGameCode(gameCode);
-		
-		gameStates.put(gameCode,newState);
-		socket.emit(STATE_UPDATE, new Gson().toJson(initialState));
+		try {
+			GameState gameState = new Gson().fromJson(details.toString(), AGameState.class);
+	
+			//need to make this a deep copy in the future
+			GameState newState = initialState;
+			String gameCode = gameState.getGameCode();
+			initialState.setPlayers(gameState.getPlayers());
+			initialState.setGameCode(gameCode);
+			
+			gameStates.put(gameCode,newState);
+			socket.emit(STATE_UPDATE, new Gson().toJson(initialState));
+		} catch (NullPointerException e) {
+			System.out.println(e);
+		}
 	}
 	
 	//todo: race conditions when same gamecode is called multiple times
@@ -144,22 +157,28 @@ public class PhaseManager {
 				if(state != null) {
 					synchronized(gamesBeingProcessed) {
 						if(gamesBeingProcessed.contains(gameCode)) {
-							
+							try {
+								actionsToProcess.put(details);
+							} catch (InterruptedException e) {
+								
+							}
 						}
-						gamesBeingProcessed.add(gameCode);
+						else {
+							gamesBeingProcessed.add(gameCode);
+							System.out.println("thread running");
+							GameState newState = state.getCurrentPhase().processAction(details,state);
+							socket.emit(STATE_UPDATE, new Gson().toJson(newState));
+							synchronized(gamesBeingProcessed) {
+								gamesBeingProcessed.remove(gameCode);
+							}
+						}
 					}
-					System.out.println("thread running");
-					GameState newState = state.getCurrentPhase().processAction(details,state);
-					socket.emit(STATE_UPDATE, new Gson().toJson(newState));
 				}
 			} catch (JSONException e) {
 				System.out.println("json exception in thread");
 			} finally {
 				synchronized(threads) {
 					threads.remove(this);
-				}
-				synchronized(gamesBeingProcessed) {
-					gamesBeingProcessed.remove(gameCode);
 				}
 				threadLock.lock();
 				threadSignal.signalAll();
@@ -188,8 +207,6 @@ public class PhaseManager {
 						threadSignal.await();
 						threadLock.unlock();
 					}
-					
-					Thread.sleep(100); //should take out once await is ready
 				} catch (InterruptedException e) {
 					System.out.println("ThreadManager interrupted");
 				}
