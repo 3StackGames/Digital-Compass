@@ -17,6 +17,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import testGame.AGameState;
+
 import com.google.gson.Gson;
 
 public class PhaseManager {
@@ -45,7 +47,7 @@ public class PhaseManager {
 	public static void main(String args[]) {
 		PhaseManager manager = new PhaseManager();
 		if(args.length == 0)
-			manager.connect("http://192.168.0.109:3000");
+			manager.connect("http://192.168.0.109:3333");
 		else 
 			manager.connect(args[0]);
 	}
@@ -54,7 +56,7 @@ public class PhaseManager {
 		initialState = defaultState;
 		
 		if(URI == null) 
-			connect("http://192.168.0.109:3000");
+			connect("http://192.168.0.109:3333");
 		else 
 			connect(URI);
 	}
@@ -116,15 +118,16 @@ public class PhaseManager {
 	}
 
 	private void createGame(JSONObject details) throws JSONException {
-		GameState gameState = new Gson().fromJson(details.toString(), GameState.class);
+		GameState gameState = new Gson().fromJson(details.toString(), AGameState.class);
 
+		//need to make this a deep copy in the future
 		GameState newState = initialState;
 		String gameCode = gameState.getGameCode();
-		initialState.setPlayers(newState.getPlayers());
+		initialState.setPlayers(gameState.getPlayers());
 		initialState.setGameCode(gameCode);
 		
 		gameStates.put(gameCode,newState);
-		socket.emit(STATE_UPDATE, new Gson().toJson(newState));
+		socket.emit(STATE_UPDATE, new Gson().toJson(initialState));
 	}
 	
 	//todo: race conditions when same gamecode is called multiple times
