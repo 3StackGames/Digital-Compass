@@ -49,6 +49,15 @@ public class PhaseManager {
 		else 
 			instance.connect(args[0]);
 	}
+	
+	public void initialize(String URI, GameState defaultState) {
+		initialState = defaultState;
+		
+		if(URI == null) 
+			instance.connect("http://192.168.0.109:3000");
+		else 
+			instance.connect(URI);
+	}
 
 	public void connect(String URI) {
 		try {
