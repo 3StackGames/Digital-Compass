@@ -1,5 +1,5 @@
 var io = require('socket.io')(3333);
-var logging = true;
+var logging = false;
 
 /*======================
   Classes
@@ -13,34 +13,10 @@ var Player = function(name) {
   this.name = name != null ? name : "";
 }
 
-var GamePadInput = function(code, value) {
-  this.gameCode = code != null ? code : "";
-  this.value = value != null ? value : "";
-}
-
-/*======================
-  Mock Classes
-=======================*/
-var mockGame = function() {
-  var agame = new Game();
-  agame.gameCode = 'ABCD';
-
-  agame.players.push(new Player('Jason'));
-  agame.players.push(new Player('Arjun'));
-  agame.players.push(new Player('Richard'));
-  agame.players.push(new Player('David'));
-  return agame; 
-};
-
-var mockGamepadInput = function () {
-  var aInput = new GamePadInput('ABCD', 'boop');
-  return aInput;
-}
-
 /*======================
   Global Variables
 =======================*/
-var games = [];
+var games = {};
 var backendSocket = null;
 
 /*======================
@@ -66,11 +42,6 @@ var GAMEPAD_JOIN = 'Gamepad Join';
 var JOIN_SUCCESSFUL = 'Join Successful';
 var BEGIN_GAME = 'Begin Game';
 /*======================
-  Roles
-=======================*/
-var DISPLAY = 'Display';
-var GAMEPAD = 'Gamepad';
-/*======================
   Helper Functions
 =======================*/
 var generateGameCode = function () {
@@ -92,27 +63,17 @@ var genRandLetter = function () {
   return String.fromCharCode(65+randInt);
 };
 
-var getRoomCode = function(gameCode, role) {
-  return gameCode + ' - ' + role;
-}
-
-var joinRoom = function(socket, gameCode, role) {
-  //role specific room
-  socket.join(getRoomCode(gameCode, role));
-  //game room
+var joinGame = function(socket, gameCode, name) {
+  if(logging) console.log('adding gamepad to room: ' + gameCode);
   socket.join(gameCode);
-}
-
-var joinGame = function(socket, gameCode, role, name) {
-  joinRoom(socket, gameCode, role);
   //add to game
   console.log('-------------------');
   console.log(games);
   games[gameCode].players.push(new Player(name));
 }
 
-var createGame = function(socket, gameCode, role) {
-  joinRoom(socket, gameCode, role);
+var createGame = function(socket, gameCode) {
+  socket.join(gameCode);
   games[gameCode] = new Game(gameCode);
 }
 
@@ -126,18 +87,14 @@ io.on(CONNECTION, function(socket) {
     if(logging) console.log('Backend Connected');
     //setup
     backendSocket = socket;
-    games = [];
+    games = {};
     //end setup
 
     //relay
     socket.on(STATE_UPDATE, function(data) {
-      if(logging) console.log('State Update Received from Backend: ');
-      if(logging) console.log(data);
-      io.to(data.gameCode).emit(STATE_UPDATE, data);
-
-      //temp. TODO: remove this
-      io.sockets.emit(STATE_UPDATE, data);
-      
+      if(logging) console.log('State Update Received from Backend');
+      var parsedData = JSON.parse(data);
+      io.to(parsedData.gameCode).emit(STATE_UPDATE, parsedData);
       if(logging) console.log('State Update Relayed to Frontend');
     });
   });
@@ -150,14 +107,14 @@ io.on(CONNECTION, function(socket) {
     socket.emit(GAME_CODE, gameCode);
     if(logging) console.log('Game Code Sent to Display');
     socket.gameCode = gameCode;
-    createGame(socket, gameCode, DISPLAY);
+    createGame(socket, gameCode);
     //end setup
 
     //Relay
     socket.on(DISPLAY_ACTION_COMPLETE, function() {
       if(logging) console.log('Display Action Complete Received');
       //relay to gamepads
-      io.to(getRoomCode(socket.gameCode, GAMEPAD)).emit(DISPLAY_ACTION_COMPLETE);
+      io.to(socket.gameCode).emit(DISPLAY_ACTION_COMPLETE);
       if(logging) console.log('Display Action Relayed to gamepads');
     });
   });
@@ -166,14 +123,16 @@ io.on(CONNECTION, function(socket) {
   socket.on(GAMEPAD_JOIN, function(data) {
     if(logging) console.log('Gamepad joined');
     //setup
-    joinGame(socket, data.gameCode, GAMEPAD, data.name);
+    joinGame(socket, data.gameCode, data.name);
+    socket.gameCode = data.gameCode;
     socket.emit(JOIN_SUCCESSFUL);
     if(logging) console.log('sent Joined Successful to gamepad');
     //end setup
 
     //Begin Game
     socket.on(BEGIN_GAME, function() {
-      if(logging) console.log('Begin Game Received');
+      if(logging) console.log('Begin Game Received. Sending Game to Backend: ');
+      if(logging) console.log(games[socket.gameCode]);
       backendSocket.emit(INITIALIZE_GAME, games[socket.gameCode]);
       if(logging) console.log('Sent Initialize Game to backend');
     });
