@@ -5,7 +5,7 @@ import org.json.JSONObject;
 public abstract class Phase {
 	String name;
 	
-	//MainPhase (generic), InitialPhase, EndPhase
+	//MainPhase (generic)
 	//name, begin(), MainPhase(gameState : GameState), InitialPhase()
 	//passed in state by manager
 	public abstract GameState processAction(JSONObject action, GameState state); 
