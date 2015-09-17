@@ -7,7 +7,7 @@ import com.three_stack.digital_compass.backend.MainPhase;
 
 public class AMainPhase extends MainPhase {
 	
-	public GameState processAction(JSONObject action) {
+	public GameState processAction(JSONObject action, GameState state) {
 		return null;
 	}
 }

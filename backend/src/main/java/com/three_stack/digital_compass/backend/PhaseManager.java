@@ -1,6 +1,5 @@
 package com.three_stack.digital_compass.backend;
 
-import com.google.gson.Gson;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -8,9 +7,8 @@ import io.socket.emitter.Emitter;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -19,21 +17,21 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import testGame.AGameState;
-import testGame.AInitialPhase;
+import com.google.gson.Gson;
 
 public class PhaseManager {
 	private static PhaseManager instance = new PhaseManager();
-	
-	private final int MAX_THREADS = 16;
-	private Map<String, GameState> states = new HashMap<String, GameState>();
-	private List<Thread> threads = new ArrayList<Thread>(MAX_THREADS);
-	private Queue<JSONObject> actionsToProcess = new ArrayBlockingQueue<JSONObject>(MAX_THREADS);
-	private Thread threadManager;
-	private Lock queueLock = new ReentrantLock();
-    private Condition queueSignal = queueLock.newCondition();
-    private boolean shutdown = false;
+
     private Socket socket;
+    private GameState initialState;
+	private Thread threadManager;
+	private Map<String, GameState> gameStates = new HashMap<String, GameState>();
+	private ArrayBlockingQueue<JSONObject> actionsToProcess = new ArrayBlockingQueue<JSONObject>(100000); //account for full queue?
+
+    private HashSet<String> gamesBeingProcessed = new HashSet<String>();
+    private ArrayList<Thread> threads = new ArrayList<Thread>();
+    private Lock threadLock = new ReentrantLock();
+    private Condition threadSignal = threadLock.newCondition();
 
 	public final String BACKEND_CONNECTED = "Backend Connected";
 	public final String BACKEND_DISCONNECTED = "Backend Disconnected";
@@ -41,14 +39,18 @@ public class PhaseManager {
 	public final String INVALID_JSON = "Invalid Json";
 	public final String INITIALIZE_GAME = "Initialize Game";
 	public final String GAMEPAD_INPUT = "Gamepad Input";
+	public final String STATE_UPDATE = "State Update";
 
 	private PhaseManager() { }
 	
 	public static void main(String args[]) {
-		instance.main("http://192.168.0.109:3000");	
+		if(args.length == 0)
+			instance.connect("http://192.168.0.109:3000");
+		else 
+			instance.connect(args[0]);
 	}
 
-	public void main(String URI) {
+	public void connect(String URI) {
 		try {
 			socket = IO.socket(URI);
 		}
@@ -77,23 +79,16 @@ public class PhaseManager {
 					JSONObject details = (JSONObject) args[0];
 					createGame(details);
 					socket.emit(GAME_CREATED);
-					socket.emit("State Update", "test");
-					System.out.println("success");
 				} catch (JSONException e) {
 					socket.emit(INVALID_JSON, args);
-					System.out.println("fail");
 				}
 			}
 
 		}).on(GAMEPAD_INPUT, new Emitter.Listener() {;
 			
 			public void call(Object... args) {
-				System.out.println("received");
-				queueLock.lock();
 				JSONObject action = (JSONObject) args[0];
 				actionsToProcess.add(action);
-				queueSignal.signalAll();
-				queueLock.unlock();
 			}
 		});
 		socket.connect();
@@ -103,7 +98,7 @@ public class PhaseManager {
 	}
 	
 	public void shutDown() throws InterruptedException {
-		shutdown = true;
+		threadManager.interrupt();
 		threadManager.join();
 		for(Thread t : threads) {
 			t.join();
@@ -112,12 +107,18 @@ public class PhaseManager {
 	}
 
 	private void createGame(JSONObject details) throws JSONException {
-		AGameState gameState = new Gson().fromJson(details.toString(), AGameState.class);
+		GameState gameState = new Gson().fromJson(details.toString(), GameState.class);
+
+		GameState newState = initialState;
 		String gameCode = gameState.getGameCode();
-		GameState state = new AInitialPhase().begin(gameState);
-		states.put(gameCode,state);
+		initialState.setPlayers(newState.getPlayers());
+		initialState.setGameCode(gameCode);
+		
+		gameStates.put(gameCode,newState);
+		socket.emit(STATE_UPDATE, new Gson().toJson(newState));
 	}
 	
+	//todo: race conditions when same gamecode is called multiple times
 	private class ProcessAction implements Runnable {	
 		JSONObject details;
 		
@@ -126,47 +127,59 @@ public class PhaseManager {
 		}
 		
 		public void run() {
+			String gameCode = null;
 			try {
-				String gameCode = details.getString("gameCode");
-				GameState state = states.get(gameCode);
+				gameCode = details.getString("gameCode");
+				GameState state = gameStates.get(gameCode);
 				if(state != null) {
+					synchronized(gamesBeingProcessed) {
+						if(gamesBeingProcessed.contains(gameCode)) {
+							
+						}
+						gamesBeingProcessed.add(gameCode);
+					}
 					System.out.println("thread running");
-					//process action through gamestate's current phase
-					//get gamestate
-					//socket.emit(gamestate)
-					socket.emit("State Update", state.toString());
+					GameState newState = state.getCurrentPhase().processAction(details,state);
+					socket.emit(STATE_UPDATE, new Gson().toJson(newState));
 				}
 			} catch (JSONException e) {
+				System.out.println("json exception in thread");
+			} finally {
+				synchronized(threads) {
+					threads.remove(this);
+				}
+				synchronized(gamesBeingProcessed) {
+					gamesBeingProcessed.remove(gameCode);
+				}
+				threadLock.lock();
+				threadSignal.signalAll();
+				threadLock.unlock();
 			}
 		}
 	}
 	
 	private class ThreadManager implements Runnable {
 		
+		private final int MAX_THREADS = 16;
+		
 		public void run() {
-			while(!shutdown) {
+			while(true) {
 				try {
-					queueLock.lock();
-					while(actionsToProcess.isEmpty()) {
-						queueSignal.await();
-					}
-					
 					if(threads.size() < MAX_THREADS) {
-						Thread newThread = new Thread(new ProcessAction(actionsToProcess.poll()));
-						newThread.start();
-						threads.add(newThread);
-					}
-					queueLock.unlock();
-					
-					//should change to notify
-					for(Thread t : threads) {
-						if (!t.isAlive()) {
-							t.join();
-							threads.remove(t);
+						Thread newThread = new Thread(new ProcessAction(actionsToProcess.take()));
+						synchronized(threads) {
+							threads.add(newThread);
 						}
+						newThread.start();
 					}
-				
-					Thread.sleep(100);
+					else {
+						threadLock.lock();
+						System.out.println("max threads reached");
+						threadSignal.await();
+						threadLock.unlock();
+					}
+					
+					Thread.sleep(100); //should take out once await is ready
 				} catch (InterruptedException e) {
 					System.out.println("ThreadManager interrupted");
 				}
