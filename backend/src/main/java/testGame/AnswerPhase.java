@@ -13,6 +13,11 @@ public class AnswerPhase extends Phase{
     public GameState processAction(JSONObject action, GameState gameState) {
         AGameState state = (AGameState) gameState;
 
+        // action JSONObject contains a player and response
+
+
         return state;
     }
+
+
 }

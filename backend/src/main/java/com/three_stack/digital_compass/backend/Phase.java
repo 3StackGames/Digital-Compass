@@ -8,5 +8,5 @@ public abstract class Phase {
 	//MainPhase (generic)
 	//name, begin(), MainPhase(gameState : GameState), InitialPhase()
 	//passed in state by manager
-	public abstract GameState processAction(JSONObject action, GameState state); 
+	public abstract GameState processAction(JSONObject action, GameState state);
 }
