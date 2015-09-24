@@ -8,7 +8,6 @@ import java.util.List;
 public abstract class GameState {
 
 	protected Phase currentPhase;
-	protected Action currentAction;
 
 	@Expose
 	protected String gameCode;
@@ -25,14 +24,6 @@ public abstract class GameState {
 
 	public void setCurrentPhase(Phase currentPhase) {
 		this.currentPhase = currentPhase;
-	}
-
-	public Action getCurrentAction() {
-		return currentAction;
-	}
-
-	public void setCurrentAction(Action currentAction) {
-		this.currentAction = currentAction;
 	}
 
 	/**
