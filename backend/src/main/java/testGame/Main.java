@@ -11,6 +11,7 @@ public class Main {
         System.out.println("Starting Subtle Scheme v1e-09");
 
         GameState defaultGameState = new AGameState();
+
         PhaseManager phaseManager = new PhaseManager();
         phaseManager.initialize(null, defaultGameState);
     }

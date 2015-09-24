@@ -21,7 +21,7 @@ public class InstructionPhase extends Phase {
             instruction.setTrickBonusPointValue(2 * instruction.getTrickBonusPointValue());
         }
 
-        state.setCurrentPhase(new QuestionPhase());
+        state.setCurrentPhase(new LiePhase());
         return state;
     }
 
