@@ -1,37 +1,44 @@
 package com.three_stack.digital_compass.backend;
 
-import com.google.gson.Gson;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import testGame.AGameState;
+
+import com.google.gson.Gson;
 
 public class PhaseManager {
 	
 	public final int MAX_QUEUE_SIZE = 10000;
 	
     private Socket socket;
-    private GameState initialState;
+    private GameStateFactory defaultStateFactory;
 	private Thread threadManager;
 	private Map<String, GameState> gameStates = new HashMap<String, GameState>();
 	private ArrayBlockingQueue<JSONObject> actionsToProcess = new ArrayBlockingQueue<JSONObject>(MAX_QUEUE_SIZE);
+    private List<ArrayBlockingQueue<JSONObject>> gameActionsToProcess = new ArrayList<ArrayBlockingQueue<JSONObject>>();
+    private HashSet<String> gamesBeingProcessed = new HashSet<String>();
 	private boolean running = false;
 
-    private HashSet<String> gamesBeingProcessed = new HashSet<String>();
-    private ArrayList<Thread> threads = new ArrayList<Thread>();
+    private Lock gamesLock = new ReentrantLock();
+    private Condition gamesSignal = gamesLock.newCondition();
+    private Vector<Thread> threads = new Vector<Thread>(); 
     private Lock threadLock = new ReentrantLock();
     private Condition threadSignal = threadLock.newCondition();
 
@@ -42,6 +49,7 @@ public class PhaseManager {
 	public final String INITIALIZE_GAME = "Initialize Game";
 	public final String GAMEPAD_INPUT = "Gamepad Input";
 	public final String STATE_UPDATE = "State Update";
+	public final String SHUTDOWN = "Shutdown";
 	
 	public static void main(String args[]) {
 		PhaseManager manager = new PhaseManager();
@@ -51,8 +59,8 @@ public class PhaseManager {
 			manager.connect(args[0]);
 	}
 	
-	public void initialize(String URI, GameState defaultState) {
-		initialState = defaultState;
+	public void initialize(String URI, GameStateFactory defaultStateFactory) {
+		this.defaultStateFactory = defaultStateFactory;
 		
 		if(URI == null) 
 			connect("http://192.168.0.109:3333");
@@ -73,6 +81,7 @@ public class PhaseManager {
 
 			// @Override
 			public void call(Object... args) {
+				System.out.println("Hi");
 				socket.emit(BACKEND_CONNECTED);
 			}
 
@@ -96,7 +105,7 @@ public class PhaseManager {
 				}
 			}
 
-		}).on(GAMEPAD_INPUT, new Emitter.Listener() {;
+		}).on(GAMEPAD_INPUT, new Emitter.Listener() {
 			
 			public void call(Object... args) {
 				JSONObject action = (JSONObject) args[0];
@@ -106,6 +115,14 @@ public class PhaseManager {
 					System.out.println(e);
 				}
 			}
+		}).on(SHUTDOWN, new Emitter.Listener() {
+			public void call(Object... args) {
+				try {
+					shutdown();
+				} catch (InterruptedException e) {
+					
+				}
+			}
 		});
 		socket.connect();
 
@@ -113,7 +130,7 @@ public class PhaseManager {
         threadManager.start();
 	}
 	
-	public void shutDown() throws InterruptedException {
+	public void shutdown() throws InterruptedException {
 		if(running) {
 			threadManager.interrupt();
 			threadManager.join();
@@ -126,15 +143,15 @@ public class PhaseManager {
 
 	private void createGame(JSONObject details) throws JSONException {
 		try {
-			GameState gameState = new Gson().fromJson(details.toString(), AGameState.class);
+			GameState initialState = defaultStateFactory.createState();
+			GameState jsonState = new Gson().fromJson(details.toString(), initialState.getClass());
 	
-			//need to make this a deep copy in the future
-			GameState newState = initialState;
-			String gameCode = gameState.getGameCode();
-			initialState.setPlayers(gameState.getPlayers());
+			String gameCode = jsonState.getGameCode();
+			initialState.setPlayers(jsonState.getPlayers());
 			initialState.setGameCode(gameCode);
-			
-			gameStates.put(gameCode,newState);
+
+			initialState = initialState.getCurrentPhase().processAction(details,initialState);
+			gameStates.put(gameCode,initialState);
 			socket.emit(STATE_UPDATE, new Gson().toJson(initialState));
 		} catch (NullPointerException e) {
 			System.out.println(e);
@@ -157,29 +174,31 @@ public class PhaseManager {
 				if(state != null) {
 					synchronized(gamesBeingProcessed) {
 						if(gamesBeingProcessed.contains(gameCode)) {
-							try {
-								actionsToProcess.put(details);
+							try	{
+								gamesLock.lock();
+								gamesSignal.await();
+								gamesLock.unlock();
 							} catch (InterruptedException e) {
-								
+								//do something?
 							}
 						}
-						else {
-							gamesBeingProcessed.add(gameCode);
-							System.out.println("thread running");
-							GameState newState = state.getCurrentPhase().processAction(details,state);
-							socket.emit(STATE_UPDATE, new Gson().toJson(newState));
-							synchronized(gamesBeingProcessed) {
-								gamesBeingProcessed.remove(gameCode);
-							}
+						gamesBeingProcessed.add(gameCode);
+						System.out.println("thread running");
+						GameState newState = state.getCurrentPhase().processAction(details,state);
+						gameStates.put(gameCode, newState);
+						socket.emit(STATE_UPDATE, new Gson().toJson(newState));
+						synchronized(gamesBeingProcessed) {
+							gamesBeingProcessed.remove(gameCode);
+							gamesLock.lock();
+							gamesSignal.signal();
+							gamesLock.unlock();
 						}
 					}
 				}
 			} catch (JSONException e) {
 				System.out.println("json exception in thread");
 			} finally {
-				synchronized(threads) {
-					threads.remove(this);
-				}
+				threads.remove(this);
 				threadLock.lock();
 				threadSignal.signalAll();
 				threadLock.unlock();
@@ -196,9 +215,7 @@ public class PhaseManager {
 				try {
 					if(threads.size() < MAX_THREADS) {
 						Thread newThread = new Thread(new ProcessAction(actionsToProcess.take()));
-						synchronized(threads) {
-							threads.add(newThread);
-						}
+						threads.add(newThread);
 						newThread.start();
 					}
 					else {
