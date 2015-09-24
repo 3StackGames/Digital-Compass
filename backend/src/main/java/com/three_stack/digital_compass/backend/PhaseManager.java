@@ -22,23 +22,23 @@ import org.json.JSONObject;
 import com.google.gson.Gson;
 
 public class PhaseManager {
-	
+
 	public final int MAX_QUEUE_SIZE = 10000;
-	
-    private Socket socket;
-    private BasicGameStateFactory defaultStateFactory;
+
+	private Socket socket;
+	private BasicGameStateFactory defaultStateFactory;
 	private Thread threadManager;
 	private Map<String, BasicGameState> gameStates = new HashMap<String, BasicGameState>();
 	private ArrayBlockingQueue<JSONObject> actionsToProcess = new ArrayBlockingQueue<JSONObject>(MAX_QUEUE_SIZE);
-    private List<ArrayBlockingQueue<JSONObject>> gameActionsToProcess = new ArrayList<ArrayBlockingQueue<JSONObject>>();
-    private HashSet<String> gamesBeingProcessed = new HashSet<String>();
+	private List<ArrayBlockingQueue<JSONObject>> gameActionsToProcess = new ArrayList<ArrayBlockingQueue<JSONObject>>();
+	private HashSet<String> gamesBeingProcessed = new HashSet<String>();
 	private boolean running = false;
 
-    private Lock gamesLock = new ReentrantLock();
-    private Condition gamesSignal = gamesLock.newCondition();
-    private Vector<Thread> threads = new Vector<Thread>(); 
-    private Lock threadLock = new ReentrantLock();
-    private Condition threadSignal = threadLock.newCondition();
+	private Lock gamesLock = new ReentrantLock();
+	private Condition gamesSignal = gamesLock.newCondition();
+	private Vector<Thread> threads = new Vector<Thread>();
+	private Lock threadLock = new ReentrantLock();
+	private Condition threadSignal = threadLock.newCondition();
 
 	public final String BACKEND_CONNECTED = "Backend Connected";
 	public final String BACKEND_DISCONNECTED = "Backend Disconnected";
@@ -48,33 +48,32 @@ public class PhaseManager {
 	public final String GAMEPAD_INPUT = "Gamepad Input";
 	public final String STATE_UPDATE = "State Update";
 	public final String SHUTDOWN = "Shutdown";
-	
+
 	public static void main(String args[]) {
 		PhaseManager manager = new PhaseManager();
-		if(args.length == 0)
+		if (args.length == 0)
 			manager.connect("http://192.168.0.109:3333");
-		else 
+		else
 			manager.connect(args[0]);
 	}
-	
+
 	public void initialize(String URI, BasicGameStateFactory defaultStateFactory) {
 		this.defaultStateFactory = defaultStateFactory;
-		
-		if(URI == null) 
+
+		if (URI == null)
 			connect("http://192.168.0.109:3333");
-		else 
+		else
 			connect(URI);
 	}
 
 	public void connect(String URI) {
 		running = true;
-		
+
 		try {
 			socket = IO.socket(URI);
-		}
-		catch (URISyntaxException e) {
+		} catch (URISyntaxException e) {
 			System.out.println(e);
-		}		
+		}
 		socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
 			// @Override
@@ -91,7 +90,7 @@ public class PhaseManager {
 			}
 
 		}).on(INITIALIZE_GAME, new Emitter.Listener() {
-			
+
 			// @Override
 			public void call(Object... args) {
 				try {
@@ -104,7 +103,7 @@ public class PhaseManager {
 			}
 
 		}).on(GAMEPAD_INPUT, new Emitter.Listener() {
-			
+
 			public void call(Object... args) {
 				JSONObject action = (JSONObject) args[0];
 				try {
@@ -118,76 +117,86 @@ public class PhaseManager {
 				try {
 					shutdown();
 				} catch (InterruptedException e) {
-					
+
 				}
 			}
 		});
+		// on Game disconnect args[0] = gamecode
 		socket.connect();
 
 		threadManager = new Thread(new ThreadManager());
-        threadManager.start();
-        
-        //how to deal with input corresponding to a past gamestate? nvm, linked to race condition i guess?
+		threadManager.start();
+
+		// how to deal with input corresponding to a past gamestate? nvm, linked
+		// to race condition i guess?
 	}
-	
+
 	public void shutdown() throws InterruptedException {
-		if(running) {
+		if (running) {
 			threadManager.interrupt();
 			threadManager.join();
-			for(Thread t : threads) {
+			for (Thread t : threads) {
 				t.join();
 			}
 			socket.disconnect();
 		}
 	}
+	
+	private void stateUpdate(JSONObject action, String gameCode, BasicGameState state) {
+		BasicAction basicAction = null;
+		if(action != null) {
+			basicAction = new Gson().fromJson(action.toString(),state.getCurrentPhase().getAction());
+		}
+		state = state.getCurrentPhase().processAction(basicAction, state);
+		gameStates.put(gameCode, state);
+		socket.emit(STATE_UPDATE, new Gson().toJson(state));	
+	}
 
 	private void createGame(JSONObject details) throws JSONException {
 		try {
 			BasicGameState initialState = defaultStateFactory.createState();
-			BasicGameState jsonState = new Gson().fromJson(details.toString(), initialState.getClass());
-	
+			BasicGameState jsonState = new Gson().fromJson(details.toString(),
+					initialState.getClass());
+
 			String gameCode = jsonState.getGameCode();
 			initialState.setPlayers(jsonState.getPlayers());
 			initialState.setGameCode(gameCode);
-
-			initialState = initialState.getCurrentPhase().processAction(null,initialState);
-			gameStates.put(gameCode,initialState);
-			socket.emit(STATE_UPDATE, new Gson().toJson(initialState));
+			
+			stateUpdate(null, gameCode, initialState);
 		} catch (NullPointerException e) {
 			System.out.println(e);
 		}
 	}
-	
-	//todo: race conditions when same gamecode is called multiple times
-	private class ProcessAction implements Runnable {	
+
+	// todo: race conditions when same gamecode is called multiple times
+	private class ProcessAction implements Runnable {
 		JSONObject details;
-		
+
 		public ProcessAction(JSONObject details) {
 			this.details = details;
 		}
-		
+
 		public void run() {
 			String gameCode = null;
 			try {
 				gameCode = details.getString("gameCode");
 				BasicGameState state = gameStates.get(gameCode);
-				if(state != null) {
-					synchronized(gamesBeingProcessed) {
-						if(gamesBeingProcessed.contains(gameCode)) {
-							try	{
+				if (state != null) {
+					synchronized (gamesBeingProcessed) {
+						if (gamesBeingProcessed.contains(gameCode)) {
+							try {
 								gamesLock.lock();
 								gamesSignal.await();
 								gamesLock.unlock();
 							} catch (InterruptedException e) {
-								//do something?
+								// do something?
 							}
 						}
 						gamesBeingProcessed.add(gameCode);
 						System.out.println("thread running");
-						BasicGameState newState = state.getCurrentPhase().processAction(details,state);
-						gameStates.put(gameCode, newState);
-						socket.emit(STATE_UPDATE, new Gson().toJson(newState));
-						synchronized(gamesBeingProcessed) {
+						
+						stateUpdate(details, gameCode, state);
+						synchronized (gamesBeingProcessed) {
 							gamesBeingProcessed.remove(gameCode);
 							gamesLock.lock();
 							gamesSignal.signal();
@@ -205,20 +214,20 @@ public class PhaseManager {
 			}
 		}
 	}
-	
+
 	private class ThreadManager implements Runnable {
-		
+
 		private final int MAX_THREADS = 16;
-		
+
 		public void run() {
-			while(true) {
+			while (true) {
 				try {
-					if(threads.size() < MAX_THREADS) {
-						Thread newThread = new Thread(new ProcessAction(actionsToProcess.take()));
+					if (threads.size() < MAX_THREADS) {
+						Thread newThread = new Thread(new ProcessAction(
+								actionsToProcess.take()));
 						threads.add(newThread);
 						newThread.start();
-					}
-					else {
+					} else {
 						threadLock.lock();
 						System.out.println("max threads reached");
 						threadSignal.await();
