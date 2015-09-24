@@ -7,9 +7,8 @@ import org.json.JSONObject;
 /**
  * Created by Hyunbin on 9/16/15.
  */
-public class VotePhase extends BasicPhase{
+public class VotePhase implements BasicPhase {
 
-    @Override
     public BasicGameState processAction(JSONObject action, BasicGameState gameState) {
         SSGameState state = (SSGameState) gameState;
 

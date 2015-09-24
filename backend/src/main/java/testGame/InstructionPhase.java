@@ -4,9 +4,8 @@ import com.three_stack.digital_compass.backend.BasicGameState;
 import com.three_stack.digital_compass.backend.BasicPhase;
 import org.json.JSONObject;
 
-public class InstructionPhase extends BasicPhase {
+public class InstructionPhase implements BasicPhase {
 
-    @Override
     public BasicGameState processAction(JSONObject action, BasicGameState gameState) {
         SSGameState state = (SSGameState) gameState;
         Instruction instruction = state.getCurrentInstruction();

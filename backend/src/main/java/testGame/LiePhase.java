@@ -7,16 +7,17 @@ import org.json.JSONObject;
 /**
  * Created by Hyunbin on 9/16/15.
  */
-public class LiePhase extends BasicPhase{
+public class LiePhase implements BasicPhase {
 
-    @Override
     public BasicGameState processAction(JSONObject action, BasicGameState gameState) {
         SSGameState state = (SSGameState) gameState;
 
-        // TODO: @HyunbinTodo: Should pull question randomly from bank
-        state.setCurrentQuestion("Who is Casper?");
+        if(state.getCurrentQuestion() == null){
+            // TODO: @Hyunbin: Should pull question randomly from bank
+            state.setCurrentQuestion("Who is Casper?");
+        } else{
 
-        state.setCurrentPhase(new VotePhase());
+        }
         return state;
     }
 }

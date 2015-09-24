@@ -4,8 +4,9 @@ import com.three_stack.digital_compass.backend.BasicGameState;
 
 public class SSGameState extends BasicGameState {
 
+
     public SSGameState(){
-        setCurrentPhase(new InitialPhase());
+        setCurrentPhase(new LiePhase());
     }
 
     private String currentQuestion;
@@ -26,5 +27,4 @@ public class SSGameState extends BasicGameState {
     public void setCurrentInstruction(Instruction currentInstruction) {
         this.currentInstruction = currentInstruction;
     }
-
 }
