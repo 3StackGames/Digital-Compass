@@ -26,9 +26,9 @@ public class PhaseManager {
 	public final int MAX_QUEUE_SIZE = 10000;
 	
     private Socket socket;
-    private GameStateFactory defaultStateFactory;
+    private BasicGameStateFactory defaultStateFactory;
 	private Thread threadManager;
-	private Map<String, GameState> gameStates = new HashMap<String, GameState>();
+	private Map<String, BasicGameState> gameStates = new HashMap<String, BasicGameState>();
 	private ArrayBlockingQueue<JSONObject> actionsToProcess = new ArrayBlockingQueue<JSONObject>(MAX_QUEUE_SIZE);
     private List<ArrayBlockingQueue<JSONObject>> gameActionsToProcess = new ArrayList<ArrayBlockingQueue<JSONObject>>();
     private HashSet<String> gamesBeingProcessed = new HashSet<String>();
@@ -57,7 +57,7 @@ public class PhaseManager {
 			manager.connect(args[0]);
 	}
 	
-	public void initialize(String URI, GameStateFactory defaultStateFactory) {
+	public void initialize(String URI, BasicGameStateFactory defaultStateFactory) {
 		this.defaultStateFactory = defaultStateFactory;
 		
 		if(URI == null) 
@@ -141,8 +141,8 @@ public class PhaseManager {
 
 	private void createGame(JSONObject details) throws JSONException {
 		try {
-			GameState initialState = defaultStateFactory.createState();
-			GameState jsonState = new Gson().fromJson(details.toString(), initialState.getClass());
+			BasicGameState initialState = defaultStateFactory.createState();
+			BasicGameState jsonState = new Gson().fromJson(details.toString(), initialState.getClass());
 	
 			String gameCode = jsonState.getGameCode();
 			initialState.setPlayers(jsonState.getPlayers());
@@ -168,7 +168,7 @@ public class PhaseManager {
 			String gameCode = null;
 			try {
 				gameCode = details.getString("gameCode");
-				GameState state = gameStates.get(gameCode);
+				BasicGameState state = gameStates.get(gameCode);
 				if(state != null) {
 					synchronized(gamesBeingProcessed) {
 						if(gamesBeingProcessed.contains(gameCode)) {
@@ -182,7 +182,7 @@ public class PhaseManager {
 						}
 						gamesBeingProcessed.add(gameCode);
 						System.out.println("thread running");
-						GameState newState = state.getCurrentPhase().processAction(details,state);
+						BasicGameState newState = state.getCurrentPhase().processAction(details,state);
 						gameStates.put(gameCode, newState);
 						socket.emit(STATE_UPDATE, new Gson().toJson(newState));
 						synchronized(gamesBeingProcessed) {

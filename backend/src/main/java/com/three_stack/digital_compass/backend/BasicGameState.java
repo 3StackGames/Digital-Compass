@@ -5,24 +5,24 @@ import com.google.gson.annotations.Expose;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class GameState {
+public abstract class BasicGameState {
 
-	protected Phase currentPhase;
+	protected BasicPhase currentPhase;
 
 	@Expose
 	protected String gameCode;
 	@Expose
 	protected List<Player> players = new ArrayList<Player>();
 	
-	public GameState() {
+	public BasicGameState() {
 		
 	}
 	
-	public Phase getCurrentPhase() {
+	public BasicPhase getCurrentPhase() {
 		return currentPhase;
 	}
 
-	public void setCurrentPhase(Phase currentPhase) {
+	public void setCurrentPhase(BasicPhase currentPhase) {
 		this.currentPhase = currentPhase;
 	}
 

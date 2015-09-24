@@ -1,16 +1,16 @@
 package testGame;
 
-import com.three_stack.digital_compass.backend.GameState;
-import com.three_stack.digital_compass.backend.Phase;
+import com.three_stack.digital_compass.backend.BasicGameState;
+import com.three_stack.digital_compass.backend.BasicPhase;
 import org.json.JSONObject;
 
 /**
  * Created by Hyunbin on 9/16/15.
  */
-public class LiePhase extends Phase{
+public class LiePhase extends BasicPhase{
 
     @Override
-    public GameState processAction(JSONObject action, GameState gameState) {
+    public BasicGameState processAction(JSONObject action, BasicGameState gameState) {
         SSGameState state = (SSGameState) gameState;
 
         // TODO: @HyunbinTodo: Should pull question randomly from bank

@@ -1,8 +1,8 @@
 package testGame;
 
-import com.three_stack.digital_compass.backend.GameState;
+import com.three_stack.digital_compass.backend.BasicGameState;
 
-public class SSGameState extends GameState {
+public class SSGameState extends BasicGameState {
 
     public SSGameState(){
         setCurrentPhase(new InitialPhase());

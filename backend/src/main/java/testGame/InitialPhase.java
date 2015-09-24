@@ -1,13 +1,13 @@
 package testGame;
 
-import com.three_stack.digital_compass.backend.GameState;
-import com.three_stack.digital_compass.backend.Phase;
+import com.three_stack.digital_compass.backend.BasicGameState;
+import com.three_stack.digital_compass.backend.BasicPhase;
 import org.json.JSONObject;
 
-public class InitialPhase extends Phase {
+public class InitialPhase extends BasicPhase {
 
     @Override
-	public GameState processAction(JSONObject action, GameState state) {
+	public BasicGameState processAction(JSONObject action, BasicGameState state) {
         state.setCurrentPhase(new LiePhase());
         return state;
 	}

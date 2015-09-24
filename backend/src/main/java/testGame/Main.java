@@ -1,6 +1,6 @@
 package testGame;
 
-import com.three_stack.digital_compass.backend.GameState;
+import com.three_stack.digital_compass.backend.BasicGameState;
 import com.three_stack.digital_compass.backend.PhaseManager;
 
 /**

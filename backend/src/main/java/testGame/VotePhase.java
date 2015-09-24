@@ -1,16 +1,16 @@
 package testGame;
 
-import com.three_stack.digital_compass.backend.GameState;
-import com.three_stack.digital_compass.backend.Phase;
+import com.three_stack.digital_compass.backend.BasicGameState;
+import com.three_stack.digital_compass.backend.BasicPhase;
 import org.json.JSONObject;
 
 /**
  * Created by Hyunbin on 9/16/15.
  */
-public class VotePhase extends Phase{
+public class VotePhase extends BasicPhase{
 
     @Override
-    public GameState processAction(JSONObject action, GameState gameState) {
+    public BasicGameState processAction(JSONObject action, BasicGameState gameState) {
         SSGameState state = (SSGameState) gameState;
 
         // action JSONObject contains a player and response
