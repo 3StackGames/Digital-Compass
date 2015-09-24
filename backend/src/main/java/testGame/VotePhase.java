@@ -7,16 +7,17 @@ import org.json.JSONObject;
 /**
  * Created by Hyunbin on 9/16/15.
  */
-public class QuestionPhase extends Phase{
+public class VotePhase extends Phase{
 
     @Override
     public GameState processAction(JSONObject action, GameState gameState) {
-        AGameState state = (AGameState) gameState;
+        SSGameState state = (SSGameState) gameState;
 
-        // TODO: @HyunbinTodo: Should pull question randomly from bank
-        state.setCurrentQuestion("Who is Casper?");
+        // action JSONObject contains a player and response
 
-        state.setCurrentPhase(new AnswerPhase());
+
         return state;
     }
+
+
 }

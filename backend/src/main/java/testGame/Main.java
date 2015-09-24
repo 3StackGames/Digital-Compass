@@ -10,8 +10,7 @@ public class Main {
     public static void main(String args[]){
         System.out.println("Starting Subtle Scheme v1e-09");
 
-        GameState defaultGameState = new AGameState();
         PhaseManager phaseManager = new PhaseManager();
-        phaseManager.initialize(null, defaultGameState);
+        phaseManager.initialize(null, new SSGameStateFactory());
     }
 }

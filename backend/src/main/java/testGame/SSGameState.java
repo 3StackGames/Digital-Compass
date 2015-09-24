@@ -2,9 +2,9 @@ package testGame;
 
 import com.three_stack.digital_compass.backend.GameState;
 
-public class AGameState extends GameState {
+public class SSGameState extends GameState {
 
-    public AGameState(){
+    public SSGameState(){
         setCurrentPhase(new InitialPhase());
     }
 
@@ -27,5 +27,4 @@ public class AGameState extends GameState {
         this.currentInstruction = currentInstruction;
     }
 
-    
 }
