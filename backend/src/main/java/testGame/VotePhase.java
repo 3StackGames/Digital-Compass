@@ -11,7 +11,7 @@ public class VotePhase extends Phase{
 
     @Override
     public GameState processAction(JSONObject action, GameState gameState) {
-        AGameState state = (AGameState) gameState;
+        SSGameState state = (SSGameState) gameState;
 
         // action JSONObject contains a player and response
 

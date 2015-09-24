@@ -17,7 +17,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import testGame.AGameState;
+import testGame.SSGameState;
 
 public class PhaseManager {
 	
@@ -126,7 +126,7 @@ public class PhaseManager {
 
 	private void createGame(JSONObject details) throws JSONException {
 		try {
-			GameState gameState = new Gson().fromJson(details.toString(), AGameState.class);
+			GameState gameState = new Gson().fromJson(details.toString(), SSGameState.class);
 	
 			//need to make this a deep copy in the future
 			GameState newState = initialState;

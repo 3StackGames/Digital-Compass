@@ -11,7 +11,7 @@ public class LiePhase extends Phase{
 
     @Override
     public GameState processAction(JSONObject action, GameState gameState) {
-        AGameState state = (AGameState) gameState;
+        SSGameState state = (SSGameState) gameState;
 
         // TODO: @HyunbinTodo: Should pull question randomly from bank
         state.setCurrentQuestion("Who is Casper?");

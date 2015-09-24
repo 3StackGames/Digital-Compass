@@ -8,7 +8,7 @@ public class InstructionPhase extends Phase {
 
     @Override
     public GameState processAction(JSONObject action, GameState gameState) {
-        AGameState state = (AGameState) gameState;
+        SSGameState state = (SSGameState) gameState;
         Instruction instruction = state.getCurrentInstruction();
 
         if(instruction == null){
