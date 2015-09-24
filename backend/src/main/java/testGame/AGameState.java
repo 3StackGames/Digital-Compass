@@ -26,4 +26,6 @@ public class AGameState extends GameState {
     public void setCurrentInstruction(Instruction currentInstruction) {
         this.currentInstruction = currentInstruction;
     }
+
+    
 }

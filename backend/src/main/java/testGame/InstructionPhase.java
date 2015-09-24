@@ -24,4 +24,5 @@ public class InstructionPhase extends Phase {
         state.setCurrentPhase(new QuestionPhase());
         return state;
     }
+
 }
