@@ -1,8 +1,16 @@
 package com.three_stack.digital_compass.backend;
 
-import org.json.JSONObject;
+public abstract class BasicPhase {
 
-public interface BasicPhase {
-	
-	public abstract BasicGameState processAction(JSONObject action, BasicGameState state);
+    protected Class action;
+
+	public abstract BasicGameState processAction(BasicAction action, BasicGameState state);
+
+    public Class getAction() {
+        return action;
+    }
+
+    public void setAction(Class action) {
+        this.action = action;
+    }
 }
