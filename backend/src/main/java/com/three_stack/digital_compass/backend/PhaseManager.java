@@ -126,6 +126,8 @@ public class PhaseManager {
 
 		threadManager = new Thread(new ThreadManager());
         threadManager.start();
+        
+        //how to deal with input corresponding to a past gamestate? nvm, linked to race condition i guess?
 	}
 	
 	public void shutdown() throws InterruptedException {
@@ -148,7 +150,7 @@ public class PhaseManager {
 			initialState.setPlayers(jsonState.getPlayers());
 			initialState.setGameCode(gameCode);
 
-			initialState = initialState.getCurrentPhase().processAction(details,initialState);
+			initialState = initialState.getCurrentPhase().processAction(null,initialState);
 			gameStates.put(gameCode,initialState);
 			socket.emit(STATE_UPDATE, new Gson().toJson(initialState));
 		} catch (NullPointerException e) {
