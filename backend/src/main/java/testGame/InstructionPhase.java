@@ -1,12 +1,12 @@
 package testGame;
 
+import com.three_stack.digital_compass.backend.BasicAction;
 import com.three_stack.digital_compass.backend.BasicGameState;
 import com.three_stack.digital_compass.backend.BasicPhase;
-import org.json.JSONObject;
 
-public class InstructionPhase implements BasicPhase {
+public class InstructionPhase extends BasicPhase {
 
-    public BasicGameState processAction(JSONObject action, BasicGameState gameState) {
+    public BasicGameState processAction(BasicAction action, BasicGameState gameState) {
         SSGameState state = (SSGameState) gameState;
         Instruction instruction = state.getCurrentInstruction();
 
