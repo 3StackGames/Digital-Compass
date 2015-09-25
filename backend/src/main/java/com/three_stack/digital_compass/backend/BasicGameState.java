@@ -12,7 +12,7 @@ public abstract class BasicGameState {
 	@Expose
 	protected String gameCode;
 	@Expose
-	protected List<Player> players = new ArrayList<Player>();
+	protected List<Player> players = new ArrayList<>();
 	
 	public BasicGameState() {
 		
