@@ -11,9 +11,11 @@ public class GameState extends BasicGameState {
     private ArrayList<Lie> lies = new ArrayList<>();
     
     private int voteCount = 0;
+    private int questionCount = 0;
     
     public GameState(){
         setCurrentPhase(new LiePhase());
+        setCurrentInstruction(new Instruction(10, 20, "Here is a new instruction", 5));
     }
 
     public String getCurrentQuestion() {
@@ -47,4 +49,12 @@ public class GameState extends BasicGameState {
 	public void setVoteCount(int voteCount) {
 		this.voteCount = voteCount;
 	}
+
+    public int getQuestionCount() {
+        return questionCount;
+    }
+
+    public void setQuestionCount(int questionCount) {
+        this.questionCount = questionCount;
+    }
 }

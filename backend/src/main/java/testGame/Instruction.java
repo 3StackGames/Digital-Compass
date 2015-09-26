@@ -5,15 +5,16 @@ package testGame;
  */
 public class Instruction {
 
-    private int questionCount;
+    private int questionLimit;
     private int trickBonusPointValue;
     private int correctAnswerPointValue;
     private String instructionText;
 
-    public Instruction(int trickBonusPointValue, int correctAnswerPointValue, String instructionText){
+    public Instruction(int trickBonusPointValue, int correctAnswerPointValue, String instructionText, int questionLimit){
         this.trickBonusPointValue = trickBonusPointValue;
         this.correctAnswerPointValue = correctAnswerPointValue;
         this.instructionText = instructionText;
+        this.questionLimit = questionLimit;
     }
 
     public int getTrickBonusPointValue() {
@@ -40,11 +41,11 @@ public class Instruction {
         this.instructionText = instructionText;
     }
 
-    public int getQuestionCount() {
-        return questionCount;
+    public int getQuestionLimit() {
+        return questionLimit;
     }
 
-    public void setQuestionCount(int questionCount) {
-        this.questionCount = questionCount;
+    public void setQuestionLimit(int questionLimit) {
+        this.questionLimit = questionLimit;
     }
 }
