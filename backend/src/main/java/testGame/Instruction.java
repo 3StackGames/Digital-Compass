@@ -4,6 +4,8 @@ package testGame;
  * Created by Hyunbin on 9/16/15.
  */
 public class Instruction {
+
+    private int questionCount;
     private int trickBonusPointValue;
     private int correctAnswerPointValue;
     private String instructionText;
@@ -36,5 +38,13 @@ public class Instruction {
 
     public void setInstructionText(String instructionText) {
         this.instructionText = instructionText;
+    }
+
+    public int getQuestionCount() {
+        return questionCount;
+    }
+
+    public void setQuestionCount(int questionCount) {
+        this.questionCount = questionCount;
     }
 }
