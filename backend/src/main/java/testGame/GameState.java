@@ -7,12 +7,13 @@ import java.util.ArrayList;
 public class GameState extends BasicGameState {
 
     private String currentQuestion;
-    private int questionCount = 0;
+    
     private ArrayList<Lie> lies = new ArrayList<>();
    
     private final Instruction currentInstruction;
     
     private int voteCount = 0;
+    private int questionCount = 0;
     
     public void prepareForNewQuestion() {
     	currentQuestion = null;
@@ -36,6 +37,7 @@ public class GameState extends BasicGameState {
     
     public GameState(){
         setCurrentPhase(new LiePhase());
+        currentInstruction = new Instruction(10, 20, "Here is a new instruction", 5);
     }
 
     public String getCurrentQuestion() {

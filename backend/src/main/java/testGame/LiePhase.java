@@ -14,6 +14,7 @@ public class LiePhase extends BasicPhase {
         LieAction lieAction = (LieAction) action;
 
         if(gameState.getCurrentQuestion() == null){
+            // The case where we're on a new question cycle
             // TODO: @Hyunbin: Should pull question randomly from bank
             // TODO: @Hyunbin: Set correct answer in the game state to prevent duplicate right answers
             gameState.setCurrentQuestion("Who is Casper?");
