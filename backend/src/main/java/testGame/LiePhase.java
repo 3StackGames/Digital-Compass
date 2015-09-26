@@ -18,8 +18,8 @@ public class LiePhase extends BasicPhase {
             gameState.setCurrentQuestion("Who is Casper?");
         } else{
             // Process player input
-            gameState.getLieActions().add(lieAction);
-            if(gameState.getLieActions().size() == gameState.getPlayers().size()){
+            gameState.getLies().add(lieAction);
+            if(gameState.getLies().size() == gameState.getPlayers().size()){
                 gameState.setCurrentPhase(new VotePhase());
             }
         }
