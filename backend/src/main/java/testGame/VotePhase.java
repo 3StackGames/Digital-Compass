@@ -26,6 +26,8 @@ public class VotePhase extends BasicPhase {
         		//check if done
         		if(gameState.getVoteCount() == gameState.getPlayers().size()) {
         			gameState.setCurrentPhase(new RevealPhase());
+        			
+        			tallyScores(gameState);
         		}
         		//stop looking for a match
         		break;
@@ -33,6 +35,10 @@ public class VotePhase extends BasicPhase {
         }
 
         return state;
+    }
+    
+    private void tallyScores(GameState gameState) {
+    	
     }
 
 

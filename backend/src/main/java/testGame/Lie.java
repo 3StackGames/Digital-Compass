@@ -1,13 +1,11 @@
 package testGame;
 
-import java.util.ArrayList;
-
-public class Lie {
+public class Lie extends Belief {
 	private String lie;
 	private String liar;
-	private ArrayList<String> believers;
 	
 	public Lie(String lie, String liar) {
+		super();
 		this.lie = lie;
 		this.liar = liar;
 	}
@@ -26,13 +24,5 @@ public class Lie {
 
 	public void setLiar(String liar) {
 		this.liar = liar;
-	}
-
-	public ArrayList<String> getBelievers() {
-		return believers;
-	}
-
-	public void setBelievers(ArrayList<String> believers) {
-		this.believers = believers;
 	}
 }

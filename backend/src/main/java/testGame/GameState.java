@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class GameState extends BasicGameState {
 
-    private String currentQuestion;
+    private Question currentQuestion;
     
     private ArrayList<Lie> lies = new ArrayList<>();
    
@@ -16,7 +16,6 @@ public class GameState extends BasicGameState {
     private int questionCount = 0;
     
     public void prepareForNewQuestion() {
-    	currentQuestion = null;
     	lies = new ArrayList<>();
     }
     
@@ -38,14 +37,6 @@ public class GameState extends BasicGameState {
     public GameState(){
         setCurrentPhase(new LiePhase());
         currentInstruction = new Instruction(10, 20, "Here is a new instruction", 5);
-    }
-
-    public String getCurrentQuestion() {
-        return currentQuestion;
-    }
-
-    public void setCurrentQuestion(String currentQuestion) {
-        this.currentQuestion = currentQuestion;
     }
 
     public Instruction getCurrentInstruction() {
@@ -75,4 +66,13 @@ public class GameState extends BasicGameState {
 	public void setQuestionCount(int questionCount) {
 		this.questionCount = questionCount;
 	}
+
+	public Question getCurrentQuestion() {
+		return currentQuestion;
+	}
+
+	public void setCurrentQuestion(Question question) {
+		this.currentQuestion = question;
+	}
+
 }
