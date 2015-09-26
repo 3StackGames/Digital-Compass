@@ -8,8 +8,10 @@ public class GameState extends BasicGameState {
 
     private String currentQuestion;
     private Instruction currentInstruction;
-    private ArrayList<LieAction> lieActions = new ArrayList<>();
-
+    private ArrayList<Lie> lies = new ArrayList<>();
+    
+    private int voteCount = 0;
+    
     public GameState(){
         setCurrentPhase(new LiePhase());
     }
@@ -30,11 +32,19 @@ public class GameState extends BasicGameState {
         this.currentInstruction = currentInstruction;
     }
 
-    public ArrayList<LieAction> getLieActions() {
-        return lieActions;
-    }
+	public ArrayList<Lie> getLies() {
+		return lies;
+	}
 
-    public void setLieActions(ArrayList<LieAction> lieActions) {
-        this.lieActions = lieActions;
-    }
+	public void setLies(ArrayList<Lie> lies) {
+		this.lies = lies;
+	}
+
+	public int getVoteCount() {
+		return voteCount;
+	}
+
+	public void setVoteCount(int voteCount) {
+		this.voteCount = voteCount;
+	}
 }

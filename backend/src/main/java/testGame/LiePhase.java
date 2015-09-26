@@ -1,8 +1,8 @@
 package testGame;
 
-        import com.three_stack.digital_compass.backend.BasicAction;
-        import com.three_stack.digital_compass.backend.BasicGameState;
-        import com.three_stack.digital_compass.backend.BasicPhase;
+import com.three_stack.digital_compass.backend.BasicAction;
+import com.three_stack.digital_compass.backend.BasicGameState;
+import com.three_stack.digital_compass.backend.BasicPhase;
 
 /**
  * Created by Hyunbin on 9/16/15.
@@ -15,11 +15,13 @@ public class LiePhase extends BasicPhase {
 
         if(gameState.getCurrentQuestion() == null){
             // TODO: @Hyunbin: Should pull question randomly from bank
+            // TODO: @Hyunbin: Set correct answer in the game state to prevent duplicate right answers
             gameState.setCurrentQuestion("Who is Casper?");
         } else{
             // Process player input
-            gameState.getLieActions().add(lieAction);
-            if(gameState.getLieActions().size() == gameState.getPlayers().size()){
+            Lie lie = new Lie(lieAction.getLie(), lieAction.getPlayer().getDisplayName());
+            gameState.getLies().add(lie);
+            if(gameState.getLies().size() == gameState.getPlayers().size()){
                 gameState.setCurrentPhase(new VotePhase());
             }
         }
