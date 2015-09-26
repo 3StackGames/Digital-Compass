@@ -9,13 +9,13 @@ import com.three_stack.digital_compass.backend.BasicAction;
 public class VoteAction extends BasicAction {
 
     @Expose
-    private String lie;
+    private String answer;
 
-    public String getLie() {
-        return lie;
+    public String getAnswer() {
+        return answer;
     }
 
-    public void setLie(String lie) {
-        this.lie = lie;
+    public void setAnswer(String lie) {
+        this.answer = lie;
     }
 }

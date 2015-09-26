@@ -26,12 +26,11 @@ public class GameState extends BasicGameState {
     	questionCount = 0;
     }
     
+    public void incrementVoteCount() {
+    	voteCount++;
+    }
     public void incrementQuestionCount() {
     	questionCount++;
-    }
-    
-    public void resetQuestionCount() {
-    	questionCount = 0;
     }
     
     public GameState(){
