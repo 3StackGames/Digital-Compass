@@ -18,7 +18,7 @@ public class LiePhase extends BasicPhase {
             // TODO: @Hyunbin: Should pull question randomly from bank
             // TODO: @Hyunbin: Set correct answer in the game state to prevent duplicate right answers
             gameState.setCurrentQuestion("Who is Casper?");
-            gameState.setQuestionCount(gameState.getQuestionCount() + 1);
+            gameState.incrementQuestionCount();
         } else{
             // Process player input
             Lie lie = new Lie(lieAction.getLie(), lieAction.getPlayer().getDisplayName());

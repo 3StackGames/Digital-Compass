@@ -13,11 +13,26 @@ public class RevealPhase extends BasicPhase {
         
 		// TODO Auto-generated method stub
 		if(revealAction.isMoveOn()) {
-			gameState.setCurrentPhase(new ScorePhase());
+			resetRound(gameState);
+			Instruction instruction = gameState.getCurrentInstruction();
+			if(gameState.getQuestionCount() < instruction.getQuestionCount()) {
+				//new round
+				gameState.setCurrentPhase(new LiePhase());
+			} else {
+				//game over
+				gameState.setCurrentPhase(new EndPhase());
+			}
 		} else {
 			System.out.println("Uh Oh. Received a weird RevealAction");
 		}
 		return gameState;
 	}
+
+	private void resetRound(GameState gameState) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
 
 }

@@ -4,8 +4,9 @@ public abstract class BasicGameStateFactory {
 
 	BasicPhase currentPhase;
 	
-	public void setPhase(BasicPhase phase) {
+	public BasicGameStateFactory setPhase(BasicPhase phase) {
 		currentPhase = phase;
+		return this;
 	}
 	
 	public abstract BasicGameState createState();

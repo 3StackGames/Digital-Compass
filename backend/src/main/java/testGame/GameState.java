@@ -13,6 +13,14 @@ public class GameState extends BasicGameState {
     private int voteCount = 0;
     private int questionCount = 0;
     
+    public void incrementQuestionCount() {
+    	questionCount++;
+    }
+    
+    public void resetQuestionCount() {
+    	questionCount = 0;
+    }
+    
     public GameState(){
         setCurrentPhase(new LiePhase());
         setCurrentInstruction(new Instruction(10, 20, "Here is a new instruction", 5));
@@ -50,11 +58,11 @@ public class GameState extends BasicGameState {
 		this.voteCount = voteCount;
 	}
 
-    public int getQuestionCount() {
-        return questionCount;
-    }
+	public int getQuestionCount() {
+		return questionCount;
+	}
 
-    public void setQuestionCount(int questionCount) {
-        this.questionCount = questionCount;
-    }
+	public void setQuestionCount(int questionCount) {
+		this.questionCount = questionCount;
+	}
 }
