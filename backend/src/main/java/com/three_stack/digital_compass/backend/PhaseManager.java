@@ -30,6 +30,8 @@ public class PhaseManager {
 	private Vector<ProcessAction> threads = new Vector<ProcessAction>();
 	private Lock threadLock = new ReentrantLock();
 	private Condition threadSignal = threadLock.newCondition();
+	private Lock actionLock = new ReentrantLock();
+	private Condition actionSignal = actionLock.newCondition();
 
 	public final String BACKEND_CONNECTED = "Backend Connected";
 	public final String BACKEND_DISCONNECTED = "Backend Disconnected";
@@ -100,6 +102,9 @@ public class PhaseManager {
 				JSONObject action = (JSONObject) args[0];
 				try {
 					actionsToProcess.put(action);
+					actionLock.lock();
+					actionSignal.signal();
+					actionLock.unlock();
 				} catch (InterruptedException e) {
 					System.out.println(e);
 				}
@@ -247,10 +252,17 @@ public class PhaseManager {
 								}
 							}
 						}
-						if (newThread == null)
-							newThread = new ProcessAction(actionsToProcess.take());
-						threads.add(newThread);
-						newThread.start();
+						if (newThread == null) {
+							if (gamesBeingProcessed.isEmpty()) {
+								newThread = new ProcessAction(actionsToProcess.take());
+								threads.add(newThread);
+								newThread.start();
+							} else {
+								actionLock.lock();
+								actionSignal.await();
+								actionLock.unlock();
+							}
+						}
 					} else {
 						threadLock.lock();
 						System.out.println("max threads reached");
