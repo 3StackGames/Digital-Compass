@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -22,13 +23,10 @@ public class PhaseManager {
 	private BasicGameStateFactory defaultStateFactory;
 	private Thread threadManager;
 	private Map<String, BasicGameState> gameStates = new HashMap<String, BasicGameState>();
-	private ArrayBlockingQueue<JSONObject> actionsToProcess = new ArrayBlockingQueue<JSONObject>(MAX_QUEUE_SIZE);
-	private List<ArrayBlockingQueue<JSONObject>> gameActionsToProcess = new ArrayList<ArrayBlockingQueue<JSONObject>>();
+	private LinkedBlockingQueue<JSONObject> actionsToProcess = new LinkedBlockingQueue<JSONObject>(MAX_QUEUE_SIZE);
 	private HashSet<String> gamesBeingProcessed = new HashSet<String>();
 	private boolean running = false;
 
-	private Lock gamesLock = new ReentrantLock();
-	private Condition gamesSignal = gamesLock.newCondition();
 	private Vector<ProcessAction> threads = new Vector<ProcessAction>();
 	private Lock threadLock = new ReentrantLock();
 	private Condition threadSignal = threadLock.newCondition();
@@ -127,9 +125,6 @@ public class PhaseManager {
 
 		threadManager = new Thread(new ThreadManager());
 		threadManager.start();
-
-		// how to deal with input corresponding to a past gamestate? nvm, linked
-		// to race condition i guess?
 	}
 	
 	private void endGame(String gameCode) throws InterruptedException {
@@ -154,12 +149,34 @@ public class PhaseManager {
 	
 	private void stateUpdate(JSONObject action, String gameCode, BasicGameState state) {
 		BasicAction basicAction = null;
+		BasicPhase currentPhase = state.getCurrentPhase();
 		if(action != null) {
-			basicAction = new Gson().fromJson(action.toString(),state.getCurrentPhase().getAction());
+			basicAction = (BasicAction) new Gson().fromJson(action.toString(),currentPhase.getAction());
 		}
-		state = state.getCurrentPhase().processAction(basicAction, state);
+		
+		state = currentPhase.processAction(basicAction, state);
+		if (state.getCurrentPhase() != currentPhase) {
+			deleteActions(gameCode);
+		}
 		gameStates.put(gameCode, state);
 		socket.emit(STATE_UPDATE, new Gson().toJson(state));	
+	}
+	
+	private void deleteActions(String gameCode) {
+		synchronized (actionsToProcess) {
+			for (JSONObject action : actionsToProcess) {
+				if (extractGameCode(action).equals(gameCode))
+					actionsToProcess.remove(action);
+			}
+		}
+	}
+	
+	private String extractGameCode(JSONObject action) {
+		try {
+			return action.getString("gameCode");
+		} catch (JSONException e) {
+			return null;
+		}
 	}
 
 	private void createGame(JSONObject details) throws JSONException {
@@ -178,7 +195,6 @@ public class PhaseManager {
 		}
 	}
 
-	// todo: race conditions when same gamecode gets multiple actions
 	private class ProcessAction extends Thread {
 		JSONObject details;
 		String gameCode;
@@ -192,26 +208,10 @@ public class PhaseManager {
 				gameCode = details.getString("gameCode");
 				BasicGameState state = gameStates.get(gameCode);
 				if (state != null) {
+					System.out.println("thread running");						
+					stateUpdate(details, gameCode, state);
 					synchronized (gamesBeingProcessed) {
-						if (gamesBeingProcessed.contains(gameCode)) {
-							try {
-								gamesLock.lock();
-								gamesSignal.await();
-								gamesLock.unlock();
-							} catch (InterruptedException e) {
-								// do something?
-							}
-						}
-						gamesBeingProcessed.add(gameCode);
-						System.out.println("thread running");
-						
-						stateUpdate(details, gameCode, state);
-						synchronized (gamesBeingProcessed) {
-							gamesBeingProcessed.remove(gameCode);
-							gamesLock.lock();
-							gamesSignal.signal();
-							gamesLock.unlock();
-						}
+						gamesBeingProcessed.remove(gameCode);
 					}
 				}
 			} catch (JSONException e) {
@@ -233,7 +233,22 @@ public class PhaseManager {
 			while (true) {
 				try {
 					if (threads.size() < MAX_THREADS) {
-						ProcessAction newThread = new ProcessAction(actionsToProcess.take());
+						ProcessAction newThread = null;
+						synchronized(actionsToProcess) {						
+							for (JSONObject action : actionsToProcess) {
+								String gameCode = extractGameCode(action);
+								if(!gamesBeingProcessed.contains(gameCode)) {
+									synchronized(gamesBeingProcessed) {
+										gamesBeingProcessed.add(gameCode);
+									}
+									actionsToProcess.remove(action);
+									newThread = new ProcessAction(action);
+									break;
+								}
+							}
+						}
+						if (newThread == null)
+							newThread = new ProcessAction(actionsToProcess.take());
 						threads.add(newThread);
 						newThread.start();
 					} else {
