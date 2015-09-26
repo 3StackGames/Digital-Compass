@@ -35,5 +35,4 @@ public class Lie {
 	public void setBelievers(ArrayList<String> believers) {
 		this.believers = believers;
 	}
-	
 }
