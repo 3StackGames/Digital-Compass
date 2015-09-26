@@ -5,18 +5,21 @@ import com.google.gson.annotations.Expose;
 public class Player {
 
 	@Expose
-	private String name;
+	private String displayName;
 
 	@Expose
 	private int score;
+	
+	@Expose
+	private String accountName;
 
 	/**
 	 *
 	 * @return
 	 * The name
 	 */
-	public String getName() {
-		return name;
+	public String getDisplayName() {
+		return displayName;
 	}
 
 	/**
@@ -24,8 +27,8 @@ public class Player {
 	 * @param name
 	 * The name
 	 */
-	public void setName(String name) {
-		this.name = name;
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 	/**
@@ -44,5 +47,13 @@ public class Player {
 	 */
 	public void setScore(int score) {
 		this.score = score;
+	}
+
+	public String getAccountName() {
+		return accountName;
+	}
+
+	public void setAccountName(String accountName) {
+		this.accountName = accountName;
 	}
 }

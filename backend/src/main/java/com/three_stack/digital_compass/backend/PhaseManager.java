@@ -36,7 +36,7 @@ public class PhaseManager {
 
 	private Lock gamesLock = new ReentrantLock();
 	private Condition gamesSignal = gamesLock.newCondition();
-	private Vector<Thread> threads = new Vector<Thread>();
+	private Vector<ProcessAction> threads = new Vector<ProcessAction>();
 	private Lock threadLock = new ReentrantLock();
 	private Condition threadSignal = threadLock.newCondition();
 
@@ -48,6 +48,7 @@ public class PhaseManager {
 	public final String GAMEPAD_INPUT = "Gamepad Input";
 	public final String STATE_UPDATE = "State Update";
 	public final String SHUTDOWN = "Shutdown";
+	public final String END_GAME = "End Game";
 
 	public static void main(String args[]) {
 		PhaseManager manager = new PhaseManager();
@@ -120,8 +121,15 @@ public class PhaseManager {
 
 				}
 			}
+		}).on(END_GAME, new Emitter.Listener() {
+			public void call(Object... args) {
+				try {
+					endGame((String) args[0]);
+				} catch (InterruptedException e) {
+
+				}
+			}
 		});
-		// on Game disconnect args[0] = gamecode
 		socket.connect();
 
 		threadManager = new Thread(new ThreadManager());
@@ -130,12 +138,21 @@ public class PhaseManager {
 		// how to deal with input corresponding to a past gamestate? nvm, linked
 		// to race condition i guess?
 	}
+	
+	private void endGame(String gameCode) throws InterruptedException {
+		for (ProcessAction t : threads) {
+			if (t.gameCode != null && t.gameCode.equals(gameCode)) {
+				t.join();
+			}
+		}
+		gameStates.remove(gameCode);
+	}
 
 	public void shutdown() throws InterruptedException {
 		if (running) {
 			threadManager.interrupt();
 			threadManager.join();
-			for (Thread t : threads) {
+			for (ProcessAction t : threads) {
 				t.join();
 			}
 			socket.disconnect();
@@ -168,16 +185,16 @@ public class PhaseManager {
 		}
 	}
 
-	// todo: race conditions when same gamecode is called multiple times
-	private class ProcessAction implements Runnable {
+	// todo: race conditions when same gamecode gets multiple actions
+	private class ProcessAction extends Thread {
 		JSONObject details;
+		String gameCode;
 
 		public ProcessAction(JSONObject details) {
 			this.details = details;
 		}
 
 		public void run() {
-			String gameCode = null;
 			try {
 				gameCode = details.getString("gameCode");
 				BasicGameState state = gameStates.get(gameCode);
@@ -223,8 +240,7 @@ public class PhaseManager {
 			while (true) {
 				try {
 					if (threads.size() < MAX_THREADS) {
-						Thread newThread = new Thread(new ProcessAction(
-								actionsToProcess.take()));
+						ProcessAction newThread = new ProcessAction(actionsToProcess.take());
 						threads.add(newThread);
 						newThread.start();
 					} else {
