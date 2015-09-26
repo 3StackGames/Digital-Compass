@@ -8,8 +8,15 @@ public class EndPhase extends BasicPhase {
 
 	@Override
 	public BasicGameState processAction(BasicAction action, BasicGameState state) {
-		// TODO Auto-generated method stub
-		return null;
+		GameState gameState = (GameState) state;
+		EndAction revealAction = (EndAction) action;
+
+        if(!revealAction.isExit()){
+            gameState.resetGame();
+            gameState.setCurrentPhase(new LiePhase());
+        }
+
+		return gameState;
 	}
 
 }
