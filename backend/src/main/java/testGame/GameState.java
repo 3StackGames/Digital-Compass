@@ -7,10 +7,19 @@ import java.util.ArrayList;
 public class GameState extends BasicGameState {
 
     private String currentQuestion;
+    private int questionCount = 0;
     private Instruction currentInstruction;
     private ArrayList<Lie> lies = new ArrayList<>();
     
     private int voteCount = 0;
+    
+    public void incrementQuestionCount() {
+    	questionCount++;
+    }
+    
+    public void resetQuestionCount() {
+    	questionCount = 0;
+    }
     
     public GameState(){
         setCurrentPhase(new LiePhase());
@@ -46,5 +55,13 @@ public class GameState extends BasicGameState {
 
 	public void setVoteCount(int voteCount) {
 		this.voteCount = voteCount;
+	}
+
+	public int getQuestionCount() {
+		return questionCount;
+	}
+
+	public void setQuestionCount(int questionCount) {
+		this.questionCount = questionCount;
 	}
 }
