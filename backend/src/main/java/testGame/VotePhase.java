@@ -9,8 +9,10 @@ import com.three_stack.digital_compass.backend.BasicPhase;
  */
 public class VotePhase extends BasicPhase {
 
-    public BasicGameState processAction(BasicAction action, BasicGameState gameState) {
-        SSGameState state = (SSGameState) gameState;
+    public BasicGameState processAction(BasicAction action, BasicGameState state) {
+        GameState gameState = (GameState) state;
+        VoteAction lieAction = (VoteAction) action;
+
 
         return state;
     }

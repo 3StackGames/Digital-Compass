@@ -1,6 +1,5 @@
 package testGame;
 
-import com.three_stack.digital_compass.backend.BasicGameState;
 import com.three_stack.digital_compass.backend.PhaseManager;
 
 /**
@@ -11,6 +10,6 @@ public class Main {
         System.out.println("Starting Subtle Scheme v1e-09");
 
         PhaseManager phaseManager = new PhaseManager();
-        phaseManager.initialize(null, new SSGameStateFactory());
+        phaseManager.initialize(null, new GameStateFactory());
     }
 }
