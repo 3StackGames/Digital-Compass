@@ -8,10 +8,23 @@ public class GameState extends BasicGameState {
 
     private String currentQuestion;
     private int questionCount = 0;
-    private Instruction currentInstruction;
     private ArrayList<Lie> lies = new ArrayList<>();
+   
+    private final Instruction currentInstruction;
     
     private int voteCount = 0;
+    
+    public void prepareForNewQuestion() {
+    	currentQuestion = null;
+    	lies = new ArrayList<>();
+    }
+    
+    @Override
+    public void resetGame() {
+    	super.resetGame();
+    	prepareForNewQuestion();
+    	questionCount = 0;
+    }
     
     public void incrementQuestionCount() {
     	questionCount++;
@@ -35,10 +48,6 @@ public class GameState extends BasicGameState {
 
     public Instruction getCurrentInstruction() {
         return currentInstruction;
-    }
-
-    public void setCurrentInstruction(Instruction currentInstruction) {
-        this.currentInstruction = currentInstruction;
     }
 
 	public ArrayList<Lie> getLies() {

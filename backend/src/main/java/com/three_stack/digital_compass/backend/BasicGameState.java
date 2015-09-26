@@ -18,6 +18,16 @@ public abstract class BasicGameState {
 		
 	}
 	
+	public void resetGame() {
+		resetPlayerScores();
+	}
+	
+	protected void resetPlayerScores() {
+		for(Player player : players) {
+			player.setScore(0);
+		}
+	}
+	
 	public BasicPhase getCurrentPhase() {
 		return currentPhase;
 	}
