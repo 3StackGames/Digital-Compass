@@ -4,9 +4,9 @@ var logging = false;
 /*======================
   Classes
 =======================*/
-var Game = function(gameCode) {
+var Game = function(gameCode, packs) {
   this.gameCode = gameCode != null ? gameCode : "";
-  this.packList = [];
+  this.packList = packs != null && packs.length > 0 ? packs : [];
   this.players = [];//array of players
 };
 
@@ -26,6 +26,8 @@ var backendSocket = null;
 /* ===== GENERAL ===== */
 //Everyone's first event is connection
 var CONNECTION = 'connection';
+//In the Lobby, informs everyone a player has joined
+var PLAYER_JOINED = 'Player Joined';
 //relayed from backend to everyone
 var STATE_UPDATE = 'State Update';
 //relayed from display to backend
@@ -73,9 +75,9 @@ var joinGame = function(socket, gameCode, name) {
   games[gameCode].players.push(new Player(name));
 }
 
-var createGame = function(socket, gameCode) {
+var createGame = function(socket, gameCode, packs) {
   socket.join(gameCode);
-  games[gameCode] = new Game(gameCode);
+  games[gameCode] = new Game(gameCode, packs);
 }
 
 io.on(CONNECTION, function(socket) {
@@ -102,14 +104,13 @@ io.on(CONNECTION, function(socket) {
 
   /*===== DISPLAY ========*/
   socket.on(DISPLAY_JOIN, function(packs) {
-    //Todo: @Jason pass packs to game engine and add to gamestate
     if(logging) console.log('Display Joined');
     //setup
     var gameCode = generateGameCode();
     socket.emit(GAME_CODE, gameCode);
     if(logging) console.log('Game Code Sent to Display');
     socket.gameCode = gameCode;
-    createGame(socket, gameCode);
+    createGame(socket, gameCode, packs);
     //end setup
 
     //Relay
@@ -124,11 +125,13 @@ io.on(CONNECTION, function(socket) {
   /*===== GAMEPAD ========*/
   socket.on(GAMEPAD_JOIN, function(data) {
     if(logging) console.log('Gamepad joined');
+    var gameCode = data.gameCode;
     //setup
-    joinGame(socket, data.gameCode, data.name);
-    socket.gameCode = data.gameCode;
-    socket.emit(JOIN_SUCCESSFUL);
-    if(logging) console.log('sent Joined Successful to gamepad');
+    joinGame(socket, gameCode, data.name);
+    socket.gameCode = gameCode;
+    //let everyone know a new player has joined
+    io.to(gameCode).emit(PLAYER_JOINED, games[gameCode]);
+    if(logging) console.log('sent Player Joined to Everyone');
     //end setup
 
     //Begin Game
