@@ -6,6 +6,7 @@ var logging = false;
 =======================*/
 var Game = function(gameCode) {
   this.gameCode = gameCode != null ? gameCode : "";
+  this.packList = [];
   this.players = [];//array of players
 };
 
@@ -100,7 +101,8 @@ io.on(CONNECTION, function(socket) {
   });
 
   /*===== DISPLAY ========*/
-  socket.on(DISPLAY_JOIN, function() {
+  socket.on(DISPLAY_JOIN, function(packs) {
+    //Todo: @Jason pass packs to game engine and add to gamestate
     if(logging) console.log('Display Joined');
     //setup
     var gameCode = generateGameCode();
