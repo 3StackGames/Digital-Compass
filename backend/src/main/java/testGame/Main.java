@@ -10,6 +10,6 @@ public class Main {
         System.out.println("Starting Subtle Scheme v1e-09");
 
         PhaseManager phaseManager = new PhaseManager();
-        phaseManager.initialize("http://localhost", new GameStateFactory());
+        phaseManager.initialize("http://localhost:3333", new GameStateFactory());
     }
 }
