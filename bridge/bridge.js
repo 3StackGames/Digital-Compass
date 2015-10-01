@@ -1,5 +1,5 @@
 var io = require('socket.io')(3333);
-var logging = false;
+var logging = true;
 
 /*======================
   Classes
