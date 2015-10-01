@@ -26,8 +26,7 @@ var backendSocket = null;
 /* ===== GENERAL ===== */
 //Everyone's first event is connection
 var CONNECTION = 'connection';
-//In the Lobby, informs everyone a player has joined
-var PLAYER_JOINED = 'Player Joined';
+//relayed from bridge on display or gamepad join
 //relayed from backend to everyone
 var STATE_UPDATE = 'State Update';
 //relayed from display to backend
@@ -39,10 +38,8 @@ var BACKEND_CONNECTED = 'Backend Connected';
 var INITIALIZE_GAME = 'Initialize Game';
 /* ===== DISPLAY ===== */
 var DISPLAY_JOIN = 'Display Join';
-var GAME_CODE = 'Game Code';
 /* ===== GAMEPAD ===== */
 var GAMEPAD_JOIN = 'Gamepad Join';
-var JOIN_SUCCESSFUL = 'Join Successful';
 var BEGIN_GAME = 'Begin Game';
 /*======================
   Helper Functions
@@ -107,10 +104,10 @@ io.on(CONNECTION, function(socket) {
     if(logging) console.log('Display Joined');
     //setup
     var gameCode = generateGameCode();
-    socket.emit(GAME_CODE, gameCode);
-    if(logging) console.log('Game Code Sent to Display');
     socket.gameCode = gameCode;
     createGame(socket, gameCode, packs);
+    socket.emit(STATE_UPDATE, games[gameCode]);
+    if(logging) console.log('State Update Sent to Display');
     //end setup
 
     //Relay
@@ -130,7 +127,7 @@ io.on(CONNECTION, function(socket) {
     joinGame(socket, gameCode, data.name);
     socket.gameCode = gameCode;
     //let everyone know a new player has joined
-    io.to(gameCode).emit(PLAYER_JOINED, games[gameCode]);
+    io.to(gameCode).emit(STATE_UPDATE, games[gameCode]);
     if(logging) console.log('sent Player Joined to Everyone');
     //end setup
 
