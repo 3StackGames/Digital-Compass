@@ -8,7 +8,9 @@ import com.three_stack.digital_compass.backend.BasicPhase;
  * Created by Hyunbin on 9/16/15.
  */
 public class LiePhase extends BasicPhase {
-
+	public LiePhase() {
+		super();
+	}
     public BasicGameState processAction(BasicAction action, BasicGameState state) {
         GameState gameState = (GameState) state;
         LieAction lieAction = (LieAction) action;
