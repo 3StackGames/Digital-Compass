@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BasicGameState {
-
+	@Expose
 	protected BasicPhase currentPhase;
 
 	@Expose
