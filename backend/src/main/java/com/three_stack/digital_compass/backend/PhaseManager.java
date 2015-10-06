@@ -1,19 +1,23 @@
 package com.three_stack.digital_compass.backend;
 
-import com.google.gson.Gson;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.net.URISyntaxException;
-import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.google.gson.Gson;
 
 public class PhaseManager {
 
@@ -66,7 +70,7 @@ public class PhaseManager {
 		try {
 			socket = IO.socket(URI);
 		} catch (URISyntaxException e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
 		socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
@@ -93,6 +97,7 @@ public class PhaseManager {
 					socket.emit(GAME_CREATED);
 				} catch (JSONException e) {
 					socket.emit(INVALID_JSON, args);
+					e.printStackTrace();
 				}
 			}
 
@@ -106,7 +111,7 @@ public class PhaseManager {
 					actionSignal.signal();
 					actionLock.unlock();
 				} catch (InterruptedException e) {
-					System.out.println(e);
+					e.printStackTrace();
 				}
 			}
 		}).on(SHUTDOWN, new Emitter.Listener() {
@@ -114,7 +119,7 @@ public class PhaseManager {
 				try {
 					shutdown();
 				} catch (InterruptedException e) {
-
+					e.printStackTrace();
 				}
 			}
 		}).on(END_GAME, new Emitter.Listener() {
@@ -122,7 +127,7 @@ public class PhaseManager {
 				try {
 					endGame((String) args[0]);
 				} catch (InterruptedException e) {
-
+					e.printStackTrace();
 				}
 			}
 		});
@@ -180,6 +185,7 @@ public class PhaseManager {
 		try {
 			return action.getString("gameCode");
 		} catch (JSONException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -196,7 +202,7 @@ public class PhaseManager {
 			
 			stateUpdate(null, gameCode, initialState);
 		} catch (NullPointerException e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
 	}
 
@@ -220,7 +226,7 @@ public class PhaseManager {
 					}
 				}
 			} catch (JSONException e) {
-				System.out.println("json exception in thread");
+				e.printStackTrace();
 			} finally {
 				threads.remove(this);
 				threadLock.lock();
@@ -270,7 +276,7 @@ public class PhaseManager {
 						threadLock.unlock();
 					}
 				} catch (InterruptedException e) {
-					System.out.println("ThreadManager interrupted");
+					e.printStackTrace();
 				}
 			}
 		}
