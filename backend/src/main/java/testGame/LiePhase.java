@@ -19,8 +19,10 @@ public class LiePhase extends BasicPhase {
             // The case where we're on a new question cycle
             // TODO: @Hyunbin: Should pull question randomly from bank
             // TODO: @Hyunbin: Set correct answer in the game state to prevent duplicate right answers
-            gameState.getCurrentQuestion().setQuestion("Who is Casper?");
-            gameState.getCurrentQuestion().setAnswer("My Best Friend");
+        	Question question = new Question("Who is Casper?", "My Best Friend");
+        	gameState.setCurrentQuestion(question);
+//            gameState.getCurrentQuestion().setQuestion("Who is Casper?");
+//            gameState.getCurrentQuestion().setAnswer("My Best Friend");
             gameState.incrementQuestionCount();
         } else{
             // Process player input
