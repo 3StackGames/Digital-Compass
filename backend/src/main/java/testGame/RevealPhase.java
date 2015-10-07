@@ -5,7 +5,10 @@ import com.three_stack.digital_compass.backend.BasicGameState;
 import com.three_stack.digital_compass.backend.BasicPhase;
 
 public class RevealPhase extends BasicPhase {
-
+	public RevealPhase() {
+		super();
+		setAction(RevealAction.class);
+	}
 	@Override
 	public BasicGameState processAction(BasicAction action, BasicGameState state) {
 		GameState gameState = (GameState) state;
