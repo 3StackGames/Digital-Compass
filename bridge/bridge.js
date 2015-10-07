@@ -92,7 +92,10 @@ io.on(CONNECTION, function(socket) {
 
     //relay
     socket.on(STATE_UPDATE, function(data) {
-      if(logging) console.log('State Update Received from Backend');
+      if(logging) {
+        console.log('State Update Received from Backend: ');
+        console.log(data);
+      }
       var parsedData = JSON.parse(data);
       io.to(parsedData.gameCode).emit(STATE_UPDATE, parsedData);
       if(logging) console.log('State Update Relayed to Frontend');
