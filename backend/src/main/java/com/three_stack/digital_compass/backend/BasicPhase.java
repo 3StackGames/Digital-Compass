@@ -8,7 +8,7 @@ public abstract class BasicPhase {
     
     //meant primarily for the sake of emitting the name of the phase for frontend
     @Expose
-    protected static String phaseName;
+    protected String phaseName;
     
 	public abstract BasicGameState processAction(BasicAction action, BasicGameState state);
 	
