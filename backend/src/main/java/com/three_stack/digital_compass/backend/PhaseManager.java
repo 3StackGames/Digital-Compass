@@ -161,13 +161,12 @@ public class PhaseManager {
 		BasicPhase currentPhase = state.getCurrentPhase();
 		
 		if(action != null) {
-			System.out.println(action.toString());
 			basicAction = (BasicAction) new Gson().fromJson(action.toString(),currentPhase.getAction());
-		}
-		
-		state = currentPhase.processAction(basicAction, state);
-		if (state.getCurrentPhase() != currentPhase) {
-			deleteActions(gameCode);
+			
+			state = currentPhase.processAction(basicAction, state);
+			if (state.getCurrentPhase() != currentPhase) {
+				deleteActions(gameCode);
+			}
 		}
 		
 		gameStates.put(gameCode, state);
