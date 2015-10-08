@@ -27,7 +27,7 @@ public class LiePhase extends BasicPhase {
             gameState.incrementQuestionCount();
         } else{
             // Process player input
-            Lie lie = new Lie(lieAction.getLie(), lieAction.getPlayer().getDisplayName());
+            Lie lie = new Lie(lieAction.getLie(), lieAction.getPlayer());
             gameState.getLies().add(lie);
             if(gameState.getLies().size() == gameState.getPlayers().size()){
                 gameState.setCurrentPhase(new VotePhase());

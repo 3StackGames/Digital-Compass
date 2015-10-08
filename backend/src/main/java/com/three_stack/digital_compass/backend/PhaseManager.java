@@ -14,7 +14,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -77,7 +76,6 @@ public class PhaseManager {
 
 			// @Override
 			public void call(Object... args) {
-				System.out.println("Hi");
 				socket.emit(BACKEND_CONNECTED);
 			}
 
@@ -163,6 +161,7 @@ public class PhaseManager {
 		BasicPhase currentPhase = state.getCurrentPhase();
 		
 		if(action != null) {
+			System.out.println(action.toString());
 			basicAction = (BasicAction) new Gson().fromJson(action.toString(),currentPhase.getAction());
 		}
 		
@@ -221,8 +220,7 @@ public class PhaseManager {
 			try {
 				gameCode = details.getString("gameCode");
 				BasicGameState state = gameStates.get(gameCode);
-				if (state != null) {
-					System.out.println("thread running");						
+				if (state != null) {					
 					stateUpdate(details, gameCode, state);
 					synchronized (gamesBeingProcessed) {
 						gamesBeingProcessed.remove(gameCode);

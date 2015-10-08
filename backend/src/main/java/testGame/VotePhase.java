@@ -19,7 +19,7 @@ public class VotePhase extends BasicPhase {
 
 		// add vote
 		String votedAnswer = lieAction.getAnswer();
-		String believer = lieAction.getPlayer().getDisplayName();
+		String believer = lieAction.getPlayer();
 
 		Question currentQuestion = gameState.getCurrentQuestion();
 		String answer = currentQuestion.getAnswer();

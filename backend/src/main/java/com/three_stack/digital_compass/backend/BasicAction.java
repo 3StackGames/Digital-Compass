@@ -4,7 +4,7 @@ public abstract class BasicAction {
 
 	private String gameCode;
 
-	private Player player;
+	private String player;
 
 	public String getGameCode() {
 		return gameCode;
@@ -14,11 +14,11 @@ public abstract class BasicAction {
 		this.gameCode = gameCode;
 	}
 
-	public Player getPlayer() {
+	public String getPlayer() {
 		return player;
 	}
 
-	public void setPlayer(Player player) {
+	public void setPlayer(String player) {
 		this.player = player;
 	}
 }
