@@ -19,7 +19,7 @@ public class RevealPhase extends BasicPhase {
 			if(gameState.getQuestionCount() < instruction.getQuestionLimit()) {
 				//new round
 				gameState.prepareForNewQuestion();
-				gameState.setCurrentPhase(new LiePhase());
+				gameState.setCurrentPhase(new LiePhase(gameState));
 			} else {
 				//game over
 				gameState.setCurrentPhase(new EndPhase());

@@ -17,6 +17,8 @@ public class GameState extends BasicGameState {
     
     public void prepareForNewQuestion() {
     	lies = new ArrayList<>();
+        currentQuestion = null;
+		voteCount = 0;
     }
     
     @Override
@@ -34,7 +36,7 @@ public class GameState extends BasicGameState {
     }
     
     public GameState(){
-        setCurrentPhase(new LiePhase());
+        setCurrentPhase(new LiePhase(this));
         currentInstruction = new Instruction(10, 20, "Here is a new instruction", 5);
     }
 
