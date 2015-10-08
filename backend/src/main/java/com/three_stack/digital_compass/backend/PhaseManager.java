@@ -1,9 +1,5 @@
 package com.three_stack.digital_compass.backend;
 
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
-
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +15,10 @@ import org.json.JSONObject;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 public class PhaseManager {
 
