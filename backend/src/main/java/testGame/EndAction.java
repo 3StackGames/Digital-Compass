@@ -6,13 +6,13 @@ import com.three_stack.digital_compass.backend.BasicAction;
  * Created by Hyunbin on 9/25/15.
  */
 public class EndAction extends BasicAction {
-    private boolean exit;
+    private boolean restart;
 
-    public boolean isExit() {
-        return exit;
+    public boolean isRestart() {
+        return restart;
     }
 
-    public void setExit(boolean exit) {
-        this.exit = exit;
+    public void setRestart(boolean exit) {
+        this.restart = exit;
     }
 }
