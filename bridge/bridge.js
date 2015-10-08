@@ -11,7 +11,7 @@ var Game = function(gameCode, packs) {
 };
 
 var Player = function(name) {
-  this.name = name != null ? name : "";
+  this.displayName = name != null ? name : "";
 }
 
 /*======================
