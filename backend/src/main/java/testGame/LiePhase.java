@@ -22,9 +22,9 @@ public class LiePhase extends BasicPhase {
             // TODO: @Hyunbin: Set correct answer in the game state to prevent duplicate right answers
         	Question question = new Question("Who is Casper?", "My Best Friend");
         	gameState.setCurrentQuestion(question);
+            gameState.incrementQuestionCount();
 //            gameState.getCurrentQuestion().setQuestion("Who is Casper?");
 //            gameState.getCurrentQuestion().setAnswer("My Best Friend");
-            gameState.incrementQuestionCount();
         } else{
             // Process player input
             Lie lie = new Lie(lieAction.getLie(), lieAction.getPlayer());
