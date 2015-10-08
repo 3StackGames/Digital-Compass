@@ -1,17 +1,13 @@
 package com.three_stack.digital_compass.backend;
 
-import com.google.gson.annotations.Expose;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BasicGameState {
-	@Expose
 	protected BasicPhase currentPhase;
 
-	@Expose
 	protected String gameCode;
-	@Expose
+	
 	protected List<Player> players = new ArrayList<>();
 	
 	public BasicGameState() {
