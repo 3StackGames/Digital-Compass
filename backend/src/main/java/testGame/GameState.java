@@ -17,6 +17,7 @@ public class GameState extends BasicGameState {
     
     public void prepareForNewQuestion() {
     	lies = new ArrayList<>();
+		voteCount = 0;
     }
     
     @Override
