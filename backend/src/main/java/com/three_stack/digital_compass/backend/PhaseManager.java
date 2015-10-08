@@ -18,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class PhaseManager {
 
@@ -160,6 +161,7 @@ public class PhaseManager {
 	private void stateUpdate(JSONObject action, String gameCode, BasicGameState state) {
 		BasicAction basicAction = null;
 		BasicPhase currentPhase = state.getCurrentPhase();
+		
 		if(action != null) {
 			basicAction = (BasicAction) new Gson().fromJson(action.toString(),currentPhase.getAction());
 		}
@@ -168,6 +170,7 @@ public class PhaseManager {
 		if (state.getCurrentPhase() != currentPhase) {
 			deleteActions(gameCode);
 		}
+		
 		gameStates.put(gameCode, state);
 		socket.emit(STATE_UPDATE, new Gson().toJson(state));	
 	}
