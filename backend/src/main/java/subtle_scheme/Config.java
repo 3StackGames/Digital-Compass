@@ -1,4 +1,4 @@
-package testGame;
+package subtle_scheme;
 
 public class Config {
 	public static final String MONGO_ADDRESS = "localhost";

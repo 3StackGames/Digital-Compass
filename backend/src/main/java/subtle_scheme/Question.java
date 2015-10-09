@@ -1,4 +1,4 @@
-package testGame;
+package subtle_scheme;
 
 public class Question extends Belief {
 	

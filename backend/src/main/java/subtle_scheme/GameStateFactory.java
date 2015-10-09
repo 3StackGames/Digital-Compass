@@ -1,4 +1,4 @@
-package testGame;
+package subtle_scheme;
 
 import com.three_stack.digital_compass.backend.BasicGameState;
 import com.three_stack.digital_compass.backend.BasicGameStateFactory;

@@ -1,4 +1,4 @@
-package testGame;
+package subtle_scheme;
 
 public class Lie extends Belief {
 	private String lie;

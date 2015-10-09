@@ -1,4 +1,4 @@
-package testGame;
+package subtle_scheme;
 
 import com.google.gson.annotations.Expose;
 import com.three_stack.digital_compass.backend.BasicAction;
