@@ -33,17 +33,16 @@ public class VotePhase extends BasicPhase {
 				if (lie.getLie().equals(votedAnswer)) {
 					lie.getBelievers().add(believer);
 					gameState.incrementVoteCount();
-					// check if done
-					if (gameState.getVoteCount() == gameState.getPlayers().size()) {
-						tallyScores(gameState);
-						gameState.transitionPhase(new RevealPhase());
-					}
 					// stop looking for a match
 					break;
 				}
 			}
 		}
-
+		// check if done
+		if (gameState.getVoteCount() == gameState.getPlayers().size()) {
+			tallyScores(gameState);
+			gameState.transitionPhase(new RevealPhase());
+		}
 		return state;
 	}
 
