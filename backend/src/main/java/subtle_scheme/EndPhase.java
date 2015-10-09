@@ -18,7 +18,7 @@ public class EndPhase extends BasicPhase {
 
         if(revealAction.isRestart()){
             gameState.resetGame();
-            gameState.setCurrentPhase(new LiePhase(gameState));
+            gameState.transitionPhase(new LiePhase());
         }
 
 		return gameState;

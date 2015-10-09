@@ -36,7 +36,7 @@ public class GameState extends BasicGameState {
     }
     
     public GameState(){
-        setCurrentPhase(new LiePhase(this));
+        transitionPhase(new LiePhase());
         currentInstruction = new Instruction(10, 20, "Here is a new instruction", 5);
     }
 

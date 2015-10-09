@@ -10,7 +10,7 @@ public class GameStateFactory extends BasicGameStateFactory {
     @Override
     public BasicGameState createState() {
     	GameState gs = new GameState();
-    	gs.setCurrentPhase(new LiePhase(gs));
+    	gs.transitionPhase(new LiePhase());
         return new GameState();
     }
 }
