@@ -9,8 +9,8 @@ import com.three_stack.digital_compass.backend.BasicGameStateFactory;
 public class GameStateFactory extends BasicGameStateFactory {
     @Override
     public BasicGameState createState() {
-    	GameState gs = new GameState();
-    	gs.transitionPhase(new LiePhase());
-        return new GameState();
+    	GameState gs = new GameState(new Instruction(10, 20, "Here is a new instruction", 5));
+        gs.transitionPhase(new LiePhase());
+        return gs;
     }
 }
