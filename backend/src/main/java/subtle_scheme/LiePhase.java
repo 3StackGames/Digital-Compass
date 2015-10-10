@@ -97,10 +97,17 @@ public class LiePhase extends BasicPhase {
     }
 
     private List<Document> getPacks(GameState gameState, MongoCollection<Document> packCollection) {
-        //get relevant packs
-        //TODO: Only get requested packs
         List<Document> packs = new ArrayList<>();
-        MongoCursor<Document> cursor = packCollection.find().iterator();
+        //Create query for specific packs
+        List<Document> orList = new ArrayList<>();
+        Document clause;
+        for(String packName : gameState.getPackOptions()) {
+            clause = new Document(Config.PACK_NAME, packName);
+            orList.add(clause);
+        }
+        Document query = new Document("$or", orList);
+        //query for packs
+        MongoCursor<Document> cursor = packCollection.find(query).iterator();
         while (cursor.hasNext()) {
             packs.add(cursor.next());
         }

@@ -14,6 +14,8 @@ public class GameState extends BasicGameState {
 
     private List<String> packs;
 
+    private List<String> packOptions;
+
     private transient Set<ObjectId> askedQuestionIds;
 
     private List<Lie> lies = new ArrayList<>();
@@ -89,5 +91,13 @@ public class GameState extends BasicGameState {
 
     public void setPacks(List<String> packs) {
         this.packs = packs;
+    }
+
+    public List<String> getPackOptions() {
+        return packOptions;
+    }
+
+    public void setPackOptions(List<String> packOptions) {
+        this.packOptions = packOptions;
     }
 }

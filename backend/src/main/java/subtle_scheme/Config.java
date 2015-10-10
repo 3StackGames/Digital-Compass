@@ -12,4 +12,5 @@ public class Config {
     public static final String PROMPT_ATTRIBUTE = "prompt";
     public static final String ANSWER_ATTRIBUTE = "answer";
     public static final String PACK_ATTRIBUTE = "pack";
+    public static final String PACK_NAME = "name";
 }
