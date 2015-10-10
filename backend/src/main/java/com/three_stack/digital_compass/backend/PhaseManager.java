@@ -58,10 +58,10 @@ public class PhaseManager {
 	public void initialize(String URI, BasicGameStateFactory defaultStateFactory) {
 		this.defaultStateFactory = defaultStateFactory;
 
-		if (URI == null)
-			connect("http://192.168.0.109:3333");
-		else
+		if (URI != null)
 			connect(URI);
+		else
+			connect("http://localhost:8080");
 	}
 
 	public void connect(String URI) {

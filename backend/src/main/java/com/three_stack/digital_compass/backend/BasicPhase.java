@@ -2,7 +2,7 @@ package com.three_stack.digital_compass.backend;
 
 public abstract class BasicPhase {
 
-    protected transient Class action;
+    protected transient static Class action;
 
     //meant primarily for the sake of emitting the name of the phase for frontend
     protected String phaseName;
