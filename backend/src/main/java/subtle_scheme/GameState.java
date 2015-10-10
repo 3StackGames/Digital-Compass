@@ -12,9 +12,9 @@ public class GameState extends BasicGameState {
 
     private Question currentQuestion;
 
-    //track which questions have been asked
-    //question id = [packId]-[questionIndex]
-    private transient Set<ObjectId> questionIds;
+    private List<String> packs;
+
+    private transient Set<ObjectId> askedQuestionIds;
 
     private List<Lie> lies = new ArrayList<>();
 
@@ -25,7 +25,8 @@ public class GameState extends BasicGameState {
 
     public GameState(Instruction instruction) {
         this.currentInstruction = instruction;
-        this.questionIds = new HashSet<>();
+        this.askedQuestionIds = new HashSet<>();
+        this.packs = new ArrayList<>();
         prepareForNewQuestion();
     }
 
@@ -73,12 +74,20 @@ public class GameState extends BasicGameState {
 
     public void setCurrentQuestion(ObjectId objectId, Question question) {
         incrementQuestionCount();
-        this.questionIds.add(objectId);
+        this.askedQuestionIds.add(objectId);
         this.currentQuestion = question;
 
     }
 
-    public Set<ObjectId> getQuestionIds() {
-        return questionIds;
+    public Set<ObjectId> getAskedQuestionIds() {
+        return askedQuestionIds;
+    }
+
+    public List<String> getPacks() {
+        return packs;
+    }
+
+    public void setPacks(List<String> packs) {
+        this.packs = packs;
     }
 }

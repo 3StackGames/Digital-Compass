@@ -82,7 +82,7 @@ public class LiePhase extends BasicPhase {
 
         //determine which questions we DON'T want
         List<ObjectId> ninList = new ArrayList<>();
-        for(ObjectId questionId : gameState.getQuestionIds()) {
+        for(ObjectId questionId : gameState.getAskedQuestionIds()) {
             ninList.add(questionId);
         }
         query.append(Config.MONGO_ID_ATTRIBUTE, new Document("$nin", ninList));
