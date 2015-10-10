@@ -1,6 +1,5 @@
 package subtle_scheme;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -44,21 +43,18 @@ public class LiePhase extends BasicPhase {
         return gameState;
     }
 
-    @Override
-    public BasicGameState processAction(BasicAction action, BasicGameState state) {
-        GameState gameState = (GameState) state;
-        LieAction lieAction = (LieAction) action;
-
-        if (lieAction != null) {
-            // Process player input
-            Lie lie = new Lie(lieAction.getLie(), lieAction.getPlayer());
-            gameState.getLies().add(lie);
-            if (gameState.getLies().size() == gameState.getPlayers().size()) {
-                gameState.transitionPhase(new VotePhase());
-            }
-        }
-        return gameState;
-    }
+	@Override
+	public BasicGameState processAction(BasicAction action, BasicGameState state) {
+		GameState gameState = (GameState) state;
+		LieAction lieAction = (LieAction) action;
+		
+		Lie lie = new Lie(lieAction.getLie(), lieAction.getPlayer());
+		gameState.getLies().add(lie);
+		if (gameState.getLies().size() == gameState.getPlayers().size()) {
+			gameState.transitionPhase(new VotePhase());
+		}
+		return gameState;
+	}
 
     private Document getNewQuestion(GameState gameState, MongoCollection<Document> packCollection, MongoCollection<Document> questionCollection) {
         List<Document> allUnaskedQuestions = getAllUnaskedQuestions(gameState, packCollection, questionCollection);
@@ -90,8 +86,6 @@ public class LiePhase extends BasicPhase {
             ninList.add(questionId);
         }
         query.append(Config.MONGO_ID_ATTRIBUTE, new Document("$nin", ninList));
-//        System.out.println(query.toString());
-        System.out.println(query.toJson().toString());
         MongoCursor<Document> allQuestionsIterator = questionCollection.find(query).iterator();
 
         //add unasked questions to list
