@@ -6,7 +6,7 @@ var logging = true;
 =======================*/
 var Game = function(gameCode, packs) {
   this.gameCode = gameCode != null ? gameCode : "";
-  this.packList = packs != null && packs.length > 0 ? packs : [];
+  this.packs = packs != null && packs.length > 0 ? packs : [];
   this.players = [];//array of players
 };
 
