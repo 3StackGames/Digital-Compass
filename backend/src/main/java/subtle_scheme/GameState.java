@@ -1,6 +1,7 @@
 package subtle_scheme;
 
 import com.three_stack.digital_compass.backend.BasicGameState;
+import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ public class GameState extends BasicGameState {
 
     //track which questions have been asked
     //question id = [packId]-[questionIndex]
-    private transient List<String> questionIds;
+    private transient List<ObjectId> questionIds;
 
     private List<Lie> lies = new ArrayList<>();
 
@@ -73,7 +74,7 @@ public class GameState extends BasicGameState {
         this.currentQuestion = question;
     }
 
-    public List<String> getQuestionIds() {
+    public List<ObjectId> getQuestionIds() {
         return questionIds;
     }
 }
