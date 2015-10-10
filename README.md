@@ -19,9 +19,9 @@ Setup
   * Each time you run the game, run each component in this order
 
 ### 1 - MongoDB ###
-1.  Create a database called `SubtleScheme`
-2.  Create a collection called `Packs`
-3.  Insert the documents from `Digital-Compass/database/packs.json` into the `Packs` collection
+1.  In terminal of your choice, go to the database directory: `cd database`
+2.  Import the packs: `mongoimport --db SubtleScheme --collection Packs --file packs.json`
+3.  Import the questions: `mongoimport --db SubtleScheme --collection Questions --file questions.json`
 
 ### 2 - Bridge Setup ###
  1. Go to the bridge directory: `cd bridge`

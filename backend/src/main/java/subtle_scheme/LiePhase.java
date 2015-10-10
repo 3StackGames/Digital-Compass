@@ -2,8 +2,8 @@ package subtle_scheme;
 
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import org.bson.Document;
 
@@ -20,7 +20,6 @@ import org.bson.types.ObjectId;
  * Created by Hyunbin on 9/16/15.
  */
 public class LiePhase extends BasicPhase {
-    private static final int MAX_RANDOM_QUESTION_SEARCH_ATTEMPTS = 100;
 
     public LiePhase() {
         super();
@@ -36,9 +35,12 @@ public class LiePhase extends BasicPhase {
         MongoDatabase db = mongoClient.getDatabase(Config.MONGO_DATABASE);
         MongoCollection<Document> packCollection = db.getCollection(Config.MONGO_PACK_COLLECTION);
         MongoCollection<Document> questionCollection = db.getCollection(Config.MONGO_QUESTION_COLLECTION);
-        mongoClient.close();
 
-        gameState.setCurrentQuestion(getNewQuestion(gameState, packCollection, questionCollection));
+        Document newQuestionDocument = getNewQuestion(gameState, packCollection, questionCollection);
+        mongoClient.close();
+        //Create Question Object
+        Question newQuestion = new Question(newQuestionDocument.getString(Config.PROMPT_ATTRIBUTE), newQuestionDocument.getString(Config.ANSWER_ATTRIBUTE));
+        gameState.setCurrentQuestion(newQuestionDocument.getObjectId(Config.MONGO_ID_ATTRIBUTE), newQuestion);
         return gameState;
     }
 
@@ -58,74 +60,42 @@ public class LiePhase extends BasicPhase {
         return gameState;
     }
 
-    private Question getNewQuestion(GameState gameState, MongoCollection<Document> packCollection, MongoCollection<Document> questionCollection) {
-        List<Document> allQuestions = getAllUnaskedQuestions(gameState, packCollection, questionCollection);
-        //filter out questions we've already asked
-        Iterator<Document> allQuestionsIterator = allQuestions.iterator();
+    private Document getNewQuestion(GameState gameState, MongoCollection<Document> packCollection, MongoCollection<Document> questionCollection) {
+        List<Document> allUnaskedQuestions = getAllUnaskedQuestions(gameState, packCollection, questionCollection);
 
-//        //filter out questions we've already asked
-//        Iterator<Document> allQuestionsIterator = allQuestions.iterator();
-//        while(allQuestionsIterator.hasNext()) {
-//            String curQuestionId = generateQuestionId(allQuestionsIterator.next(),)
-//            for(String questionId : gameState.getQuestionIds()) {
-//                String curQuestionId =
-//            }
-//        }
-//        for(Document question : allQuestions) {
-//            for(String questionId : gameState.getQuestionIds()) {
-//
-//            }
-//        }
-//
-//        //Random Selection
-//        Random random = new Random();
-//
-//        //Search until we find one we haven't used
-//        String questionId = null;
-//        Document chosenQuestion = null;
-//        int attempts = 0;
-//        do {
-//            //pick a pack
-//            Document chosenPack = packs.get(random.nextInt(packs.size()));
-//            //pick a Question
-//            List<Document> questions = (List<Document>) chosenPack.get("questions");
-//            int questionIndex = random.nextInt(questions.size());
-//            chosenQuestion = questions.get(random.nextInt(questions.size()));
-//            questionId = generateQuestionId(chosenPack, questionIndex);
-//        } while(gameState.getQuestionIds().contains(questionId) && attempts < MAX_RANDOM_QUESTION_SEARCH_ATTEMPTS);
-//
-//        //TODO: Find a long-term solution to running out of questions
-//        if(attempts >= MAX_RANDOM_QUESTION_SEARCH_ATTEMPTS) {
-//            System.out.println("No new questions found");
-//            throw new IllegalStateException("No new questions found after 100 attempts");
-//        } else {
-//            //add question to list of questions we've used
-//            gameState.getQuestionIds().add(questionId);
-//            //Create Question Object
-//            Question newQuestion = new Question(chosenQuestion.getString("prompt"), chosenQuestion.getString("answer"));
-//            return newQuestion;
-//        }
+        //Randomly Select one
+        Random random = new Random();
+
+        return allUnaskedQuestions.get(random.nextInt(allUnaskedQuestions.size()));
     }
 
     private List<Document> getAllUnaskedQuestions(GameState gameState, MongoCollection<Document> packCollection, MongoCollection<Document> questionCollection) {
         List<Document> allUnaskedQuestions = new ArrayList<>();
         List<Document> packs = getPacks(gameState, packCollection);
 
-        List<Document> packIds = new ArrayList<>();
+        //Create Query
+        Document query;
+        //Determine which packs we want
+        List<Document> orList = new ArrayList<>();
         Document clause;
         for(Document pack : packs) {
-            clause = new Document("_id", pack.getObjectId("_id"));
-            packIds.add(clause);
+            clause = new Document(Config.PACK_ATTRIBUTE, pack.getObjectId(Config.MONGO_ID_ATTRIBUTE));
+            orList.add(clause);
         }
-        Document query = new Document("$or", packIds);
+        query = new Document("$or", orList);
+
+        //determine which questions we DON'T want
+        List<ObjectId> ninList = new ArrayList<>();
+        for(ObjectId questionId : gameState.getQuestionIds()) {
+            ninList.add(questionId);
+        }
+        query.append(Config.MONGO_ID_ATTRIBUTE, new Document("$nin", ninList));
+//        System.out.println(query.toString());
+        System.out.println(query.toJson().toString());
         MongoCursor<Document> allQuestionsIterator = questionCollection.find(query).iterator();
 
         //add unasked questions to list
         while(allQuestionsIterator.hasNext()) {
-            Que
-            for(ObjectId questionId : gameState.getQuestionIds()) {
-                if(question)
-            }
             allUnaskedQuestions.add(allQuestionsIterator.next());
         }
 

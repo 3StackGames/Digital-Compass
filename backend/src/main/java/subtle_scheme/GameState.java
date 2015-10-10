@@ -4,7 +4,9 @@ import com.three_stack.digital_compass.backend.BasicGameState;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class GameState extends BasicGameState {
 
@@ -12,7 +14,7 @@ public class GameState extends BasicGameState {
 
     //track which questions have been asked
     //question id = [packId]-[questionIndex]
-    private transient List<ObjectId> questionIds;
+    private transient Set<ObjectId> questionIds;
 
     private List<Lie> lies = new ArrayList<>();
 
@@ -23,7 +25,7 @@ public class GameState extends BasicGameState {
 
     public GameState(Instruction instruction) {
         this.currentInstruction = instruction;
-        this.questionIds = new ArrayList<>();
+        this.questionIds = new HashSet<>();
         prepareForNewQuestion();
     }
 
@@ -69,12 +71,14 @@ public class GameState extends BasicGameState {
         return currentQuestion;
     }
 
-    public void setCurrentQuestion(Question question) {
+    public void setCurrentQuestion(ObjectId objectId, Question question) {
         incrementQuestionCount();
+        this.questionIds.add(objectId);
         this.currentQuestion = question;
+
     }
 
-    public List<ObjectId> getQuestionIds() {
+    public Set<ObjectId> getQuestionIds() {
         return questionIds;
     }
 }
