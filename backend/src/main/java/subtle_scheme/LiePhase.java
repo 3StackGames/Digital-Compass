@@ -19,9 +19,7 @@ import org.bson.types.ObjectId;
  * Created by Hyunbin on 9/16/15.
  */
 public class LiePhase extends BasicPhase {
-
-    public LiePhase() {
-        super();
+    static {
         setAction(LieAction.class);
     }
 

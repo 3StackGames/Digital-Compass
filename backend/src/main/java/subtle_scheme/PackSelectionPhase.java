@@ -17,8 +17,7 @@ import java.util.List;
  */
 public class PackSelectionPhase extends BasicPhase {
 
-    public PackSelectionPhase () {
-        super();
+    static {
         setAction(PackSelectionAction.class);
     }
 

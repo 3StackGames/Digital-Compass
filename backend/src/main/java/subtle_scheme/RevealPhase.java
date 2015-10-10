@@ -5,8 +5,7 @@ import com.three_stack.digital_compass.backend.BasicGameState;
 import com.three_stack.digital_compass.backend.BasicPhase;
 
 public class RevealPhase extends BasicPhase {
-	public RevealPhase() {
-		super();
+	static {
 		setAction(RevealAction.class);
 	}
 	@Override

@@ -21,8 +21,8 @@ public abstract class BasicPhase {
         return action;
     }
 
-    public void setAction(Class action) {
-        this.action = action;
+    public static void setAction(Class newAction) {
+        action = newAction;
     }
 
     public String getPhaseName() {
