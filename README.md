@@ -9,7 +9,6 @@ Digital-Compass allows you to write your game logic in Java and handles networki
 Requirements
 ----
   * [MongoDB](https://www.mongodb.org/)
-    * (Optional) MongoDB Management Tool ([Robomongo](http://robomongo.org/))
   * [Java 1.7+](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
   * Java IDE ([Eclipse](https://eclipse.org/) or [IntelliJ](https://www.jetbrains.com/idea/))
   * [NodeJS](https://nodejs.org/en/)
