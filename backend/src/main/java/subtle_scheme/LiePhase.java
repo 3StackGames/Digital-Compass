@@ -15,16 +15,15 @@ import com.three_stack.digital_compass.backend.BasicGameState;
 import com.three_stack.digital_compass.backend.BasicPhase;
 import org.bson.types.ObjectId;
 
-/**
- * Created by Hyunbin on 9/16/15.
- */
 public class LiePhase extends BasicPhase {
-    static {
-        setAction(LieAction.class);
+
+    @Override
+    public Class getAction() {
+        return LieAction.class;
     }
 
     @Override
-    public BasicGameState setup(BasicGameState state) {
+    public void setup(BasicGameState state) {
         GameState gameState = (GameState) state;
 
         //Connect to MongoDB
@@ -38,7 +37,6 @@ public class LiePhase extends BasicPhase {
         //Create Question Object
         Question newQuestion = new Question(newQuestionDocument.getString(Config.PROMPT_ATTRIBUTE), newQuestionDocument.getString(Config.ANSWER_ATTRIBUTE));
         gameState.setCurrentQuestion(newQuestionDocument.getObjectId(Config.MONGO_ID_ATTRIBUTE), newQuestion);
-        return gameState;
     }
 
 	@Override

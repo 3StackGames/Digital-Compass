@@ -5,8 +5,10 @@ import com.three_stack.digital_compass.backend.BasicGameState;
 import com.three_stack.digital_compass.backend.BasicPhase;
 
 public class EndPhase extends BasicPhase {
-	static {
-		setAction(EndAction.class);
+
+	@Override
+	public Class getAction() {
+		return EndAction.class;
 	}
 	
 	@Override

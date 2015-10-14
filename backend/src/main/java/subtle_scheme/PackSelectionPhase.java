@@ -12,20 +12,17 @@ import org.bson.Document;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Jason on 10/10/2015.
- */
 public class PackSelectionPhase extends BasicPhase {
 
-    static {
-        setAction(PackSelectionAction.class);
+    @Override
+    public Class getAction() {
+        return PackSelectionAction.class;
     }
 
     @Override
-    public BasicGameState setup(BasicGameState state) {
+    public void setup(BasicGameState state) {
         GameState gameState = (GameState) state;
         gameState.setPackOptions(getAllPackNames());
-        return state;
     }
 
     @Override
@@ -40,6 +37,8 @@ public class PackSelectionPhase extends BasicPhase {
         }
         return gameState;
     }
+
+
 
     private List<String> getAllPackNames() {
         //Get list of all Packs from MongoDB
