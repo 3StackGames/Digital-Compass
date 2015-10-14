@@ -59,8 +59,12 @@ public class LiePhase extends BasicPhase {
 
         //Randomly Select one
         Random random = new Random();
-
-        return allUnaskedQuestions.get(random.nextInt(allUnaskedQuestions.size()));
+        int unaskedQuestionCount = allUnaskedQuestions.size();
+        if(unaskedQuestionCount < 1) {
+            throw new IllegalStateException("Ran out of Questions");
+        }
+        int randomQuestionIndex = random.nextInt(unaskedQuestionCount);
+        return allUnaskedQuestions.get(randomQuestionIndex);
     }
 
     private List<Document> getAllUnaskedQuestions(GameState gameState, MongoCollection<Document> packCollection, MongoCollection<Document> questionCollection) {
