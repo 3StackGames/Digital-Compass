@@ -28,8 +28,6 @@ io.on(events.CONNECTION, function(socket) {
     socket.on(events.STATE_UPDATE, function(data) {
       var parsedData = JSON.parse(data);
       io.to(parsedData.gameCode).emit(events.STATE_UPDATE, parsedData);
-      games[parsedData.gameCode].lastUpdate = parsedData;
-      games[parsedData.gameCode].lastUpdateDisplayActionCompleted = false;
       logger.log('State Update Relayed from Backend to Frontend', data);
     });
   });
@@ -42,9 +40,8 @@ io.on(events.CONNECTION, function(socket) {
     if(reconnect) {
       gameCode = data.gameCode;
       games[gameCode].displayConnected = true;
-      //send last update
-      socket.emit(events.STATE_UPDATE, games[gameCode].lastUpdate);
-      logger.log('Display Reconnected. Last Update sent to Display.');
+      backendSocket.emit(events.DISPLAY_RECONNECTED);
+      logger.log('Display Reconnected. Backend notified.');
     } else {
       gameCode = codeGenerator.generate(games);
       games[gameCode] = new Game(gameCode);
@@ -56,9 +53,8 @@ io.on(events.CONNECTION, function(socket) {
 
     //Relay
     socket.on(events.DISPLAY_ACTION_COMPLETE, function() {
-      io.to(socket.gameCode).emit(events.DISPLAY_ACTION_COMPLETE);
-      games[socket.gameCode].lastUpdateDisplayActionCompleted = true;
-      logger.log('Display Action Commplete Received and Relayed to everyone');
+      backendSocket.emit(events.DISPLAY_ACTION_COMPLETE, socket.gameCode);
+      logger.log('Display Action Commplete Relayed to Backend');
     });
 
     //disconnect
@@ -82,9 +78,8 @@ io.on(events.CONNECTION, function(socket) {
     socket.displayName = displayName;
     if(reconnect) {
       player.connected = true;
-      //send last update
-      socket.emit(events.STATE_UPDATE, games[gameCode].lastUpdate);
-      logger.log('Gamepad Reconnected. Last Update sent to Gamepad.');
+      backendSocket.emit(events.GAMEPAD_RECONNECTED, player);
+      logger.log('Gamepad Reconnected. Backend notified.');
     } else {
       games[gameCode].players.push(new Player(data.name));
       //let everyone know a player has joined
@@ -101,7 +96,7 @@ io.on(events.CONNECTION, function(socket) {
     //Relay
     socket.on(events.GAMEPAD_INPUT, function(data) {
       backendSocket.emit(events.GAMEPAD_INPUT, data);
-      logger.log('Gamepad input received and relayed to backend', data);
+      logger.log('Gamepad input relayed to backend', data);
     });
 
     //disconnect
