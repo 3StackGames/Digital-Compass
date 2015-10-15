@@ -33,32 +33,57 @@ io.on(events.CONNECTION, function(socket) {
   });
 
   /*===== DISPLAY ========*/
-  socket.on(events.DISPLAY_JOIN, function() {
+  socket.on(events.DISPLAY_JOIN, function(data) {
     //setup
-    var gameCode = codeGenerator.generate(games);
+    var reconnect = data != null && data.gameCode.length == 4 && games[data.gameCode] != null && !games[data.gameCode].displayConnected;
+    var gameCode = null;
+    if(reconnect) {
+      logger.log('Display Reconnected');
+      gameCode = data.gameCode;
+      games[socket.gameCode].displayConnected = true;
+    } else {
+      gameCode = codeGenerator.generate(games);
+      games[gameCode] = new Game(gameCode);
+      socket.emit(events.STATE_UPDATE, games[gameCode]);
+      logger.log('Display Joined. State Update sent to Display.');
+    }
     socket.gameCode = gameCode;
     socket.join(gameCode);
-    games[gameCode] = new Game(gameCode);
-    socket.emit(events.STATE_UPDATE, games[gameCode]);
-    logger.log('Display Joined. State Update sent to Display.');
 
     //Relay
     socket.on(events.DISPLAY_ACTION_COMPLETE, function() {
       io.to(socket.gameCode).emit(events.DISPLAY_ACTION_COMPLETE);
       logger.log('Display Action Commplete Received and Relayed to everyone');
     });
+
+    //disconnect
+    socket.on(events.DISCONNECT, function(){
+      var game = games[socket.gameCode];
+      if(game == null) return;
+      //mark display as disconnected
+      game.displayConnected = false;
+    });
   });
 
   /*===== GAMEPAD ========*/
   socket.on(events.GAMEPAD_JOIN, function(data) {
     var gameCode = data.gameCode;
+    var displayName = data.name;
+    var player = getPlayer(gameCode, displayName);
+    var reconnect = player != null && !player.connected;
     //setup
     socket.join(gameCode);
-    games[gameCode].players.push(new Player(data.name));
     socket.gameCode = gameCode;
-    //let everyone know a new player has joined
-    io.to(gameCode).emit(events.STATE_UPDATE, games[gameCode]);
-    logger.log('Gamepad Joined. Update sent to everyone.', games[gameCode]);
+    socket.displayName = displayName;
+    if(reconnect) {
+      logger.log('Gamepad Reconnected', player);
+      player.connected = true;
+    } else {
+      games[gameCode].players.push(new Player(data.name));
+      //let everyone know a player has joined
+      io.to(gameCode).emit(events.STATE_UPDATE, games[gameCode]);
+      logger.log('Gamepad Joined. Update sent to everyone.', games[gameCode]);
+    }
 
     //Begin Game
     socket.on(events.BEGIN_GAME, function() {
@@ -71,5 +96,26 @@ io.on(events.CONNECTION, function(socket) {
       backendSocket.emit(events.GAMEPAD_INPUT, data);
       logger.log('Gamepad input received and relayed to backend', data);
     });
+
+    //disconnect
+    socket.on(events.DISCONNECT, function() {
+      var player = getPlayer(socket.gameCode, socket.displayName);
+      if(player == null) return;
+      //mark the player as disconnected
+      player.connected = false;
+    });
   });
 });
+/*======================
+  Helper Methods
+=======================*/
+var getPlayer = function(gameCode, displayName) {
+  if(games[gameCode] == null) return null;
+  var players = games[gameCode].players;
+  for(var i = 0; i < players.length; i++) {
+    if(players[i].displayName == displayName) {
+      return players[i];
+    }
+  }
+  return null;
+};
