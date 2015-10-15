@@ -28,6 +28,7 @@ io.on(events.CONNECTION, function(socket) {
     socket.on(events.STATE_UPDATE, function(data) {
       var parsedData = JSON.parse(data);
       io.to(parsedData.gameCode).emit(events.STATE_UPDATE, parsedData);
+      games[parsedData.gameCode].lastUpdate = parsedData;
       logger.log('State Update Relayed from Backend to Frontend', data);
     });
   });
@@ -38,9 +39,11 @@ io.on(events.CONNECTION, function(socket) {
     var reconnect = data != null && data.gameCode.length == 4 && games[data.gameCode] != null && !games[data.gameCode].displayConnected;
     var gameCode = null;
     if(reconnect) {
-      logger.log('Display Reconnected');
       gameCode = data.gameCode;
-      games[socket.gameCode].displayConnected = true;
+      games[gameCode].displayConnected = true;
+      //send last update
+      socket.emit(events.STATE_UPDATE, games[gameCode].lastUpdate);
+      logger.log('Display Reconnected. Last Update sent to Display.');
     } else {
       gameCode = codeGenerator.generate(games);
       games[gameCode] = new Game(gameCode);
@@ -76,8 +79,10 @@ io.on(events.CONNECTION, function(socket) {
     socket.gameCode = gameCode;
     socket.displayName = displayName;
     if(reconnect) {
-      logger.log('Gamepad Reconnected', player);
       player.connected = true;
+      //send last update
+      socket.emit(events.STATE_UPDATE, games[gameCode].lastUpdate);
+      logger.log('Gamepad Reconnected. Last Update sent to Gamepad.');
     } else {
       games[gameCode].players.push(new Player(data.name));
       //let everyone know a player has joined
