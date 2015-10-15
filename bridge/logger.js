@@ -9,9 +9,8 @@ exports.log = function (message, printObject) {
       console.log(message);
     } else {
       console.log(message);
-      console.log('\n');
       console.log(printObject);
-      console.log('\n');
+      console.log();
     }
   }
 };

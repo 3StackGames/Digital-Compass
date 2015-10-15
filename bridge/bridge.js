@@ -1,3 +1,6 @@
+/*======================
+  Dependencies
+=======================*/
 var io = require('socket.io')(3333);
 var events = require('./events.js');
 var codeGenerator = require('./code-generator.js');
@@ -10,26 +13,9 @@ logger.logging = true;
 =======================*/
 var games = {};
 var backendSocket = null;
-
-/*======================
-  Helper Functions
-=======================*/
-var joinGame = function(socket, gameCode, name) {
-  socket.join(gameCode);
-  //add to game
-  logger.log(games);
-  games[gameCode].players.push(new Player(name));
-}
-
-var createGame = function(socket, gameCode) {
-  socket.join(gameCode);
-  games[gameCode] = new Game(gameCode);
-}
-
 /*======================
   Event Logic
 =======================*/
-
 io.on(events.CONNECTION, function(socket) {
   /*===== BACKEND ========*/
   socket.on(events.BACKEND_CONNECTED, function() {
@@ -51,7 +37,8 @@ io.on(events.CONNECTION, function(socket) {
     //setup
     var gameCode = codeGenerator.generate(games);
     socket.gameCode = gameCode;
-    createGame(socket, gameCode);
+    socket.join(gameCode);
+    games[gameCode] = new Game(gameCode);
     socket.emit(events.STATE_UPDATE, games[gameCode]);
     logger.log('Display Joined. State Update sent to Display.');
 
@@ -66,7 +53,8 @@ io.on(events.CONNECTION, function(socket) {
   socket.on(events.GAMEPAD_JOIN, function(data) {
     var gameCode = data.gameCode;
     //setup
-    joinGame(socket, gameCode, data.name);
+    socket.join(gameCode);
+    games[gameCode].players.push(new Player(data.name));
     socket.gameCode = gameCode;
     //let everyone know a new player has joined
     io.to(gameCode).emit(events.STATE_UPDATE, games[gameCode]);
