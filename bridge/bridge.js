@@ -29,6 +29,7 @@ io.on(events.CONNECTION, function(socket) {
       var parsedData = JSON.parse(data);
       io.to(parsedData.gameCode).emit(events.STATE_UPDATE, parsedData);
       games[parsedData.gameCode].lastUpdate = parsedData;
+      games[parsedData.gameCode].lastUpdateDisplayActionCompleted = false;
       logger.log('State Update Relayed from Backend to Frontend', data);
     });
   });
@@ -56,6 +57,7 @@ io.on(events.CONNECTION, function(socket) {
     //Relay
     socket.on(events.DISPLAY_ACTION_COMPLETE, function() {
       io.to(socket.gameCode).emit(events.DISPLAY_ACTION_COMPLETE);
+      games[socket.gameCode].lastUpdateDisplayActionCompleted = true;
       logger.log('Display Action Commplete Received and Relayed to everyone');
     });
 
