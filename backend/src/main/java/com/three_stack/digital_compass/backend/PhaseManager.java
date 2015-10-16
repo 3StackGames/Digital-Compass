@@ -1,8 +1,13 @@
 package com.three_stack.digital_compass.backend;
 
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
+
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -14,10 +19,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.gson.Gson;
-
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
 
 public class PhaseManager {
 
@@ -43,17 +44,12 @@ public class PhaseManager {
 	public final String INVALID_JSON = "Invalid Json";
 	public final String INITIALIZE_GAME = "Initialize Game";
 	public final String GAMEPAD_INPUT = "Gamepad Input";
+	public final String GAMEPAD_RECONNECTED = "Gamepad Reconnected";
+	public final String GAMEPAD_DISCONNECTED = "Gamepad Disconnected";
+	public final String DISPLAY_ACTION_COMPLETE = "Display Action Complete";
 	public final String STATE_UPDATE = "State Update";
 	public final String SHUTDOWN = "Shutdown";
 	public final String END_GAME = "End Game";
-
-	public static void main(String args[]) {
-		PhaseManager manager = new PhaseManager();
-		if (args.length == 0)
-			manager.connect("http://192.168.0.109:3333");
-		else
-			manager.connect(args[0]);
-	}
 
 	public void initialize(String URI, BasicGameStateFactory defaultStateFactory) {
 		this.defaultStateFactory = defaultStateFactory;
@@ -113,6 +109,30 @@ public class PhaseManager {
 					e.printStackTrace();
 				}
 			}
+		}).on(GAMEPAD_RECONNECTED, new Emitter.Listener() {
+			public void call(Object... args) {
+				try {
+					playerConnection((JSONObject) args[0], true);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+		}).on(GAMEPAD_DISCONNECTED, new Emitter.Listener() {
+			public void call(Object... args) {
+				try {
+					playerConnection((JSONObject) args[0], false);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+		}).on(DISPLAY_ACTION_COMPLETE, new Emitter.Listener() {
+			public void call(Object... args) {
+				try {
+					displayComplete((JSONObject) args[0]);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
 		}).on(SHUTDOWN, new Emitter.Listener() {
 			public void call(Object... args) {
 				try {
@@ -136,6 +156,31 @@ public class PhaseManager {
 		threadManager.start();
 	}
 	
+	private void playerConnection(JSONObject player, boolean connected) throws JSONException {
+		String gameCode = extractGameCode(player);
+		String name = player.getString("name");
+		BasicGameState state = gameStates.get(gameCode);
+		synchronized(state) {
+			List<BasicPlayer> players = state.getPlayers();
+			for(BasicPlayer p : players) {
+				if(p.getDisplayName().equals(name)) {
+					p.setConnected(connected);
+					break;
+				}
+			}
+		}
+		stateUpdate(null,gameCode,state);
+	}
+	
+	private void displayComplete(JSONObject display) throws JSONException {
+		String gameCode = extractGameCode(display);
+		BasicGameState state = gameStates.get(gameCode);
+		synchronized(state) {
+			state.setDisplayComplete(true);
+		}
+		stateUpdate(null,gameCode,state);
+	}
+	
 	private void endGame(String gameCode) throws InterruptedException {
 		for (ProcessAction t : threads) {
 			if (t.gameCode != null && t.gameCode.equals(gameCode)) {
@@ -156,16 +201,15 @@ public class PhaseManager {
 		}
 	}
 	
-	private void stateUpdate(JSONObject action, String gameCode, BasicGameState state) {
-		BasicAction basicAction = null;
-		BasicPhase currentPhase = state.getCurrentPhase();
-		
+	private void stateUpdate(JSONObject action, String gameCode, BasicGameState state) {	
 		if(action != null) {
-			basicAction = (BasicAction) new Gson().fromJson(action.toString(),currentPhase.getAction());
+			BasicPhase currentPhase = state.getCurrentPhase();
+			BasicAction basicAction = (BasicAction) new Gson().fromJson(action.toString(),currentPhase.getAction());
 			
 			state = currentPhase.processAction(basicAction, state);
 			if (state.getCurrentPhase() != currentPhase) {
 				deleteActions(gameCode);
+				state.setDisplayComplete(false);
 			}
 		}
 		
