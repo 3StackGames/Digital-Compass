@@ -158,7 +158,7 @@ public class PhaseManager {
 	
 	private void playerConnection(JSONObject player, boolean connected) throws JSONException {
 		String gameCode = extractGameCode(player);
-		String name = player.getString("name");
+		String name = player.getString("displayName");
 		BasicGameState state = gameStates.get(gameCode);
 		synchronized(state) {
 			List<BasicPlayer> players = state.getPlayers();
