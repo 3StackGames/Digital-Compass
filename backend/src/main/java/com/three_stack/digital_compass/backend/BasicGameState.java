@@ -8,9 +8,19 @@ public abstract class BasicGameState {
 
     protected String gameCode;
 
-    protected List<Player> players = new ArrayList<>();
+    protected List<BasicPlayer> players = new ArrayList<>();
+    
+    protected boolean displayComplete = false;
 
-    public BasicGameState() {
+    public boolean isDisplayComplete() {
+		return displayComplete;
+	}
+
+	public void setDisplayComplete(boolean displayComplete) {
+		this.displayComplete = displayComplete;
+	}
+
+	public BasicGameState() {
 
     }
 
@@ -19,7 +29,7 @@ public abstract class BasicGameState {
     }
 
     protected void resetPlayerScores() {
-        for (Player player : players) {
+        for (BasicPlayer player : players) {
             player.setScore(0);
         }
     }
@@ -62,14 +72,14 @@ public abstract class BasicGameState {
     /**
      * @return The players
      */
-    public List<Player> getPlayers() {
+    public List<BasicPlayer> getPlayers() {
         return players;
     }
 
     /**
      * @param players The players
      */
-    public void setPlayers(List<Player> players) {
+    public void setPlayers(List<BasicPlayer> players) {
         this.players = players;
     }
 

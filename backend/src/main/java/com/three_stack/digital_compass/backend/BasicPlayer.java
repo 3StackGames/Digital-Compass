@@ -2,7 +2,7 @@ package com.three_stack.digital_compass.backend;
 
 import com.google.gson.annotations.Expose;
 
-public class Player {
+public class BasicPlayer {
 
 	@Expose
 	private String displayName;
@@ -12,6 +12,17 @@ public class Player {
 	
 	@Expose
 	private String accountName;
+	
+	@Expose
+	private boolean connected = true;
+
+	public boolean isConnected() {
+		return connected;
+	}
+
+	public void setConnected(boolean connected) {
+		this.connected = connected;
+	}
 
 	/**
 	 *

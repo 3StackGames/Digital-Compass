@@ -3,7 +3,7 @@ package subtle_scheme;
 import com.three_stack.digital_compass.backend.BasicAction;
 import com.three_stack.digital_compass.backend.BasicGameState;
 import com.three_stack.digital_compass.backend.BasicPhase;
-import com.three_stack.digital_compass.backend.Player;
+import com.three_stack.digital_compass.backend.BasicPlayer;
 
 /**
  * Created by Hyunbin on 9/16/15.
@@ -62,7 +62,7 @@ public class VotePhase extends BasicPhase {
 	}
 	
 	private void givePlayerPoint(GameState gameState, String displayName, int value) {
-		for(Player player : gameState.getPlayers()) {
+		for(BasicPlayer player : gameState.getPlayers()) {
 			if(player.getDisplayName().equals(displayName)) {
 				int newScore = player.getScore() + value;
 				player.setScore(newScore);
