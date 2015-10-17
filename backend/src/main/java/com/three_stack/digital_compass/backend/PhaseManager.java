@@ -164,11 +164,16 @@ public class PhaseManager {
 			List<BasicPlayer> players = state.getPlayers();
 			for(BasicPlayer p : players) {
 				if(p.getDisplayName().equals(name)) {
-					p.setConnected(connected);
+					if(connected) {
+						state = state.getCurrentPhase().onReconnect(state,p);
+					} else {
+						state = state.getCurrentPhase().onDisconnect(state,p);					
+					}
 					break;
 				}
 			}
 		}
+		
 		stateUpdate(null,gameCode,state);
 	}
 	

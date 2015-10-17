@@ -23,4 +23,15 @@ public abstract class BasicPhase {
     public void setPhaseName(String phaseName) {
         this.phaseName = phaseName;
     }
+    
+    public BasicGameState onDisconnect(BasicGameState state, BasicPlayer player) {
+    	player.setConnected(false);
+    	return state;
+    }
+    
+
+    public BasicGameState onReconnect(BasicGameState state, BasicPlayer player) {
+    	player.setConnected(true);
+    	return state;
+    }
 }
