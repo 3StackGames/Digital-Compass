@@ -1,14 +1,11 @@
 package com.three_stack.digital_compass.backend;
 
 public abstract class BasicPhase {
-
-    protected transient static Class action;
-
     //meant primarily for the sake of emitting the name of the phase for frontend
     protected String phaseName;
 
     //Called before State Updates to clients
-    public BasicGameState setup(BasicGameState state) { return state; }
+    public void setup(BasicGameState state) { }
 
     //Called after receiving Gamepad Input
     public abstract BasicGameState processAction(BasicAction action, BasicGameState state);
@@ -17,13 +14,7 @@ public abstract class BasicPhase {
         phaseName = this.getClass().getSimpleName();
     }
 
-    public Class getAction() {
-        return action;
-    }
-
-    public void setAction(Class action) {
-        this.action = action;
-    }
+    public abstract Class getAction();
 
     public String getPhaseName() {
         return phaseName;

@@ -9,10 +9,11 @@ import com.three_stack.digital_compass.backend.BasicPlayer;
  * Created by Hyunbin on 9/16/15.
  */
 public class VotePhase extends BasicPhase {
-	public VotePhase() {
-		super();
-		setAction(VoteAction.class);
+	@Override
+	public Class getAction() {
+		return VoteAction.class;
 	}
+
 	public BasicGameState processAction(BasicAction action, BasicGameState state) {
 		GameState gameState = (GameState) state;
 		VoteAction lieAction = (VoteAction) action;
