@@ -1,7 +1,7 @@
 var exports = module.exports = {};
 
 //by default, enable logging
-exports.logging = true;
+exports.enabled = true;
 
 exports.log = function (message, printObject) {
   if(exports.logging) {

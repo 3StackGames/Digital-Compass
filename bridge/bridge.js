@@ -6,8 +6,10 @@ var events = require('./events.js');
 var codeGenerator = require('./code-generator.js');
 var Game = require('./game.js');
 var Player = require('./player.js');
+var DisplayReconnect = require('./display-reconnect.js');
+var PlayerReconnect = require('./player-reconnect.js');
 var logger = require('./logger.js');
-logger.logging = true;
+logger.enabled = true;
 /*======================
   Global Variables
 =======================*/
@@ -40,7 +42,8 @@ io.on(events.CONNECTION, function(socket) {
     if(reconnect) {
       gameCode = data.gameCode;
       games[gameCode].displayConnected = true;
-      backendSocket.emit(events.DISPLAY_RECONNECTED);
+      var displayReconnect = new DisplayReconnect(gameCode);
+      backendSocket.emit(events.DISPLAY_RECONNECTED, displayReconnect);
       logger.log('Display Reconnected. Backend notified.');
     } else {
       gameCode = codeGenerator.generate(games);
@@ -52,8 +55,8 @@ io.on(events.CONNECTION, function(socket) {
     socket.join(gameCode);
 
     //Relay
-    socket.on(events.DISPLAY_ACTION_COMPLETE, function() {
-      backendSocket.emit(events.DISPLAY_ACTION_COMPLETE, socket.gameCode);
+    socket.on(events.DISPLAY_ACTION_COMPLETE, function(data) {
+      backendSocket.emit(events.DISPLAY_ACTION_COMPLETE, data);
       logger.log('Display Action Commplete Relayed to Backend');
     });
 
@@ -78,7 +81,8 @@ io.on(events.CONNECTION, function(socket) {
     socket.displayName = displayName;
     if(reconnect) {
       player.connected = true;
-      backendSocket.emit(events.GAMEPAD_RECONNECTED, player);
+      var playerReconnect = new PlayerReconnect(gameCode, displayName);
+      backendSocket.emit(events.GAMEPAD_RECONNECTED, playerReconnect);
       logger.log('Gamepad Reconnected. Backend notified.');
     } else {
       games[gameCode].players.push(new Player(data.name));

@@ -12,6 +12,7 @@ exports.DISCONNECT = 'disconnect';
 /* ===== BACKEND ONLY ===== */
 exports.BACKEND_CONNECTED = 'Backend Connected';
 exports.INITIALIZE_GAME = 'Initialize Game';
+//payload: gameCode, displayName
 exports.DISPLAY_DISCONNECTED = 'Display Disconnected';
 exports.DISPLAY_RECONNECTED = 'Display Reconnected';
 exports.GAMEPAD_DISCONNECTED = 'Gamepad Disconnected';
@@ -19,6 +20,7 @@ exports.GAMEPAD_RECONNECTED = 'Gamepad Reconnected';
 
 /* ===== DISPLAY ONLY ===== */
 exports.DISPLAY_JOIN = 'Display Join';
+//payload: gameCode
 exports.DISPLAY_ACTION_COMPLETE = 'Display Action Complete';
 
 /* ===== GAMEPAD ONLY ===== */
