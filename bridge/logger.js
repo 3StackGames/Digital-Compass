@@ -4,7 +4,7 @@ var exports = module.exports = {};
 exports.enabled = true;
 
 exports.log = function (message, printObject) {
-  if(exports.logging) {
+  if(exports.enabled) {
     if(printObject == null) {
       console.log(message);
     } else {
