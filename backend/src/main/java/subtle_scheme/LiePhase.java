@@ -27,7 +27,7 @@ public class LiePhase extends BasicPhase {
         GameState gameState = (GameState) state;
 
         //Connect to MongoDB
-        MongoClient mongoClient = new MongoClient(Config.MONGO_ADDRESS, Config.MONGO_PORT);
+        MongoClient mongoClient = MongoClientFactory.getClient();
         MongoDatabase db = mongoClient.getDatabase(Config.MONGO_DATABASE);
         MongoCollection<Document> packCollection = db.getCollection(Config.MONGO_PACK_COLLECTION);
         MongoCollection<Document> questionCollection = db.getCollection(Config.MONGO_QUESTION_COLLECTION);

@@ -42,7 +42,7 @@ public class PackSelectionPhase extends BasicPhase {
 
     private List<String> getAllPackNames() {
         //Get list of all Packs from MongoDB
-        MongoClient mongoClient = new MongoClient(Config.MONGO_ADDRESS, Config.MONGO_PORT);
+        MongoClient mongoClient = MongoClientFactory.getClient();
         MongoDatabase db = mongoClient.getDatabase(Config.MONGO_DATABASE);
         MongoCollection<Document> packCollection = db.getCollection(Config.MONGO_PACK_COLLECTION);
 
