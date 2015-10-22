@@ -1,6 +1,5 @@
 package subtle_scheme;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,10 +18,7 @@ public class Config {
     public static final String ANSWER_ATTRIBUTE = "answer";
     public static final String PACK_ATTRIBUTE = "pack";
     public static final String PACK_NAME = "name";
-    /*
-    public static String MONGO_ADDRESS;
-    public static final int MONGO_PORT = 27017;
-    */
+
     private static Properties properties = new Properties();
 
     static {
