@@ -6,8 +6,8 @@ var events = require('./events.js');
 var codeGenerator = require('./code-generator.js');
 var Game = require('./game.js');
 var Player = require('./player.js');
-var DisplayReconnect = require('./display-reconnect.js');
-var PlayerReconnect = require('./player-reconnect.js');
+var DisplayConnect = require('./display-connect.js');
+var GamepadConnect = require('./gamepad-connect.js');
 var logger = require('./logger.js');
 logger.enabled = true;
 /*======================
@@ -37,12 +37,17 @@ io.on(events.CONNECTION, function(socket) {
   /*===== DISPLAY ========*/
   socket.on(events.DISPLAY_JOIN, function(data) {
     //setup
-    var reconnect = data != null && data.gameCode.length == 4 && games[data.gameCode] != null && !games[data.gameCode].displayConnected;
+    var reconnect;
+    if(data !== null && data !== undefined && data.gameCode !== null && data.gameCode !== undefined) {
+      reconnect = data.gameCode.length == 4 && games[data.gameCode] !== null && !games[data.gameCode].displayConnected;
+    } else {
+      reconnect = false;
+    }
     var gameCode = null;
     if(reconnect) {
       gameCode = data.gameCode;
       games[gameCode].displayConnected = true;
-      var displayReconnect = new DisplayReconnect(gameCode);
+      var displayReconnect = new DisplayConnect(gameCode);
       backendSocket.emit(events.DISPLAY_RECONNECTED, displayReconnect);
       logger.log('Display Reconnected. Backend notified.');
     } else {
@@ -63,9 +68,12 @@ io.on(events.CONNECTION, function(socket) {
     //disconnect
     socket.on(events.DISCONNECT, function(){
       var game = games[socket.gameCode];
-      if(game == null) return;
+      if(game === null) return;
       //mark display as disconnected
       game.displayConnected = false;
+      //notify backend
+      var displayDisconnect = new DisplayConnect(gameCode);
+      backendSocket.emit(events.DISPLAY_DISCONNECTED, displayDisconnect);
     });
   });
 
@@ -74,14 +82,14 @@ io.on(events.CONNECTION, function(socket) {
     var gameCode = data.gameCode;
     var displayName = data.name;
     var player = getPlayer(gameCode, displayName);
-    var reconnect = player != null && !player.connected;
+    var reconnect = player !== null && !player.connected;
     //setup
     socket.join(gameCode);
     socket.gameCode = gameCode;
     socket.displayName = displayName;
     if(reconnect) {
       player.connected = true;
-      var playerReconnect = new PlayerReconnect(gameCode, displayName);
+      var playerReconnect = new GamepadConnect(gameCode, displayName);
       backendSocket.emit(events.GAMEPAD_RECONNECTED, playerReconnect);
       logger.log('Gamepad Reconnected. Backend notified.');
     } else {
@@ -106,9 +114,12 @@ io.on(events.CONNECTION, function(socket) {
     //disconnect
     socket.on(events.DISCONNECT, function() {
       var player = getPlayer(socket.gameCode, socket.displayName);
-      if(player == null) return;
+      if(player === null) return;
       //mark the player as disconnected
       player.connected = false;
+      //notify backend
+      var playerDisconnect = new GamepadConnect(socket.gameCode, player.displayName);
+      backendSocket.emit(events.GAMEPAD_DISCONNECTED, playerDisconnect);
     });
   });
 });
@@ -116,7 +127,7 @@ io.on(events.CONNECTION, function(socket) {
   Helper Methods
 =======================*/
 var getPlayer = function(gameCode, displayName) {
-  if(games[gameCode] == null) return null;
+  if(games[gameCode] === null) return null;
   var players = games[gameCode].players;
   for(var i = 0; i < players.length; i++) {
     if(players[i].displayName == displayName) {
