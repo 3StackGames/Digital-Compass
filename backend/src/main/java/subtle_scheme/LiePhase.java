@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.three_stack.digital_compass.backend.BasicPlayer;
 import org.bson.Document;
 
 import com.mongodb.MongoClient;
@@ -51,6 +52,18 @@ public class LiePhase extends BasicPhase {
 		}
 		return gameState;
 	}
+
+    @Override
+    public BasicGameState onDisconnect(BasicGameState state, BasicPlayer player) {
+        System.out.println("Player Disconnected: " + player.getDisplayName());
+        return super.onDisconnect(state, player);
+    }
+
+    @Override
+    public BasicGameState onReconnect(BasicGameState state, BasicPlayer player) {
+        System.out.println("Player Reconnected: " + player.getDisplayName());
+        return super.onReconnect(state, player);
+    }
 
     private Document getNewQuestion(GameState gameState, MongoCollection<Document> packCollection, MongoCollection<Document> questionCollection) {
         List<Document> allUnaskedQuestions = getAllUnaskedQuestions(gameState, packCollection, questionCollection);
