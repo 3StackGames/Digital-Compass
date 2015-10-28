@@ -1,4 +1,4 @@
-package subtle_scheme;
+package com.three_stack.subtle_scheme;
 
 import java.util.ArrayList;
 import java.util.List;
