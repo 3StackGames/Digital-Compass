@@ -44,6 +44,8 @@ public class PhaseManager {
 	public final String INVALID_JSON = "Invalid Json";
 	public final String INITIALIZE_GAME = "Initialize Game";
 	public final String GAMEPAD_INPUT = "Gamepad Input";
+	public final String DISPLAY_RECONNECTED = "Display Reconnected";
+	public final String DISPLAY_DISCONNECTED = "Display Disconnected";
 	public final String GAMEPAD_RECONNECTED = "Gamepad Reconnected";
 	public final String GAMEPAD_DISCONNECTED = "Gamepad Disconnected";
 	public final String DISPLAY_ACTION_COMPLETE = "Display Action Complete";
@@ -109,6 +111,22 @@ public class PhaseManager {
 					e.printStackTrace();
 				}
 			}
+		}).on(DISPLAY_RECONNECTED, new Emitter.Listener() {
+			public void call(Object... args) {
+				try {
+					displayConnection((JSONObject) args[0], true);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+		}).on(DISPLAY_DISCONNECTED, new Emitter.Listener() {
+			public void call(Object... args) {
+				try {
+					displayConnection((JSONObject) args[0], false);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
 		}).on(GAMEPAD_RECONNECTED, new Emitter.Listener() {
 			public void call(Object... args) {
 				try {
@@ -156,6 +174,21 @@ public class PhaseManager {
 		threadManager.start();
 	}
 	
+	private void displayConnection(JSONObject display, boolean connected) throws JSONException {
+		String gameCode = extractGameCode(display);
+		BasicGameState state = gameStates.get(gameCode);
+		
+		synchronized(state) {
+			if(connected) {
+				state = state.getCurrentPhase().onDisplayReconnect(state);
+			} else {
+				state = state.getCurrentPhase().onDisplayDisconnect(state);					
+			}
+		}
+		
+		stateUpdate(null,gameCode,state);
+	}
+	
 	private void playerConnection(JSONObject player, boolean connected) throws JSONException {
 		String gameCode = extractGameCode(player);
 		String name = player.getString("displayName");
@@ -165,9 +198,9 @@ public class PhaseManager {
 			for(BasicPlayer p : players) {
 				if(p.getDisplayName().equals(name)) {
 					if(connected) {
-						state = state.getCurrentPhase().onReconnect(state,p);
+						state = state.getCurrentPhase().onGamepadReconnect(state,p);
 					} else {
-						state = state.getCurrentPhase().onDisconnect(state,p);					
+						state = state.getCurrentPhase().onGamepadDisconnect(state,p);					
 					}
 					break;
 				}

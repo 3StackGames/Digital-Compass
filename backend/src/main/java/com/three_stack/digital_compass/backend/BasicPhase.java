@@ -24,14 +24,25 @@ public abstract class BasicPhase {
         this.phaseName = phaseName;
     }
     
-    public BasicGameState onDisconnect(BasicGameState state, BasicPlayer player) {
+    public BasicGameState onGamepadDisconnect(BasicGameState state, BasicPlayer player) {
     	player.setConnected(false);
     	return state;
     }
     
 
-    public BasicGameState onReconnect(BasicGameState state, BasicPlayer player) {
+    public BasicGameState onGamepadReconnect(BasicGameState state, BasicPlayer player) {
     	player.setConnected(true);
+    	return state;
+    }
+    
+    public BasicGameState onDisplayDisconnect(BasicGameState state) {
+    	state.setDisplayConnected(false);
+    	return state;
+    }
+    
+
+    public BasicGameState onDisplayReconnect(BasicGameState state) {
+    	state.setDisplayConnected(true);
     	return state;
     }
 }

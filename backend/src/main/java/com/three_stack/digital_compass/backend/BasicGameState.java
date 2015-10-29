@@ -11,8 +11,18 @@ public abstract class BasicGameState {
     protected List<BasicPlayer> players = new ArrayList<>();
     
     protected boolean displayComplete = false;
+    
+    protected boolean displayConnected = true;
 
-    public boolean isDisplayComplete() {
+    public boolean isDisplayConnected() {
+		return displayConnected;
+	}
+
+	public void setDisplayConnected(boolean displayConnected) {
+		this.displayConnected = displayConnected;
+	}
+
+	public boolean isDisplayComplete() {
 		return displayComplete;
 	}
 
