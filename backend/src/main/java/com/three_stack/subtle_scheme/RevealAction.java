@@ -1,4 +1,4 @@
-package subtle_scheme;
+package com.three_stack.subtle_scheme;
 
 import com.google.gson.annotations.Expose;
 import com.three_stack.digital_compass.backend.BasicAction;

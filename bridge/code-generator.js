@@ -2,8 +2,9 @@ var exports = module.exports = {};
 
 exports.generate = function (existingGames) {
   var uniqueCode = false;
+  var newGameCode;
   while(!uniqueCode) {
-    var newGameCode = exports.genRandLetter()+exports.genRandLetter()+exports.genRandLetter()+exports.genRandLetter();
+    newGameCode = exports.genRandLetter()+exports.genRandLetter()+exports.genRandLetter()+exports.genRandLetter();
     if(!exports.isExistingGameCode(newGameCode, existingGames)) uniqueCode = true;
   }
   return newGameCode;
@@ -12,7 +13,7 @@ exports.generate = function (existingGames) {
 exports.isExistingGameCode = function(gameCode, existingGames) {
   if(typeof existingGames[gameCode] === 'undefined') return false;
   else return true;
-}
+};
 
 exports.genRandLetter = function () {
   var randInt = Math.floor(Math.random()*26);
