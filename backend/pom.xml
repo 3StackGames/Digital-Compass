@@ -25,21 +25,15 @@
                     <target>1.7</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.three_stack.subtle_scheme.Main</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>digital-compass</id>
+            <url>http://rushpoll.com:8081/nexus/content/repositories/digital-compass</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
