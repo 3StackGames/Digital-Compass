@@ -68,7 +68,7 @@ io.on(events.CONNECTION, function(socket) {
     //disconnect
     socket.on(events.DISCONNECT, function(){
       var game = games[socket.gameCode];
-      if(game === null) return;
+      if(!game) return;
       //mark display as disconnected
       game.displayConnected = false;
       //notify backend
@@ -114,7 +114,7 @@ io.on(events.CONNECTION, function(socket) {
     //disconnect
     socket.on(events.DISCONNECT, function() {
       var player = getPlayer(socket.gameCode, socket.displayName);
-      if(player === null) return;
+      if(!player) return;
       //mark the player as disconnected
       player.connected = false;
       //notify backend
@@ -127,7 +127,7 @@ io.on(events.CONNECTION, function(socket) {
   Helper Methods
 =======================*/
 var getPlayer = function(gameCode, displayName) {
-  if(games[gameCode] === null) return null;
+  if(!games[gameCode]) return null;
   var players = games[gameCode].players;
   for(var i = 0; i < players.length; i++) {
     if(players[i].displayName == displayName) {
