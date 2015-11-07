@@ -214,7 +214,7 @@ public class PhaseManager {
 		String gameCode = extractGameCode(display);
 		BasicGameState state = gameStates.get(gameCode);
 		synchronized(state) {
-			state.setDisplayComplete(true);
+			state = state.getCurrentPhase().onDisplayActionComplete(state);
 		}
 		stateUpdate(null,gameCode,state);
 	}
