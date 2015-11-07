@@ -14,7 +14,9 @@ public abstract class BasicPhase {
         phaseName = this.getClass().getSimpleName();
     }
 
-    public abstract Class getAction();
+    public Class getAction() {
+    	return BasicAction.class;
+    }
 
     public String getPhaseName() {
         return phaseName;
