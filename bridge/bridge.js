@@ -91,17 +91,9 @@ io.on(events.CONNECTION, function(socket) {
     var gameCode = data.gameCode;
     var displayName = data.name;
     var player = getPlayer(gameCode, displayName);
-    var reconnect = player !== null && !player.connected;
-
-    //check if game already began
-    var activeGameCode = data.gameCode.length == 4 && games[data.gameCode];
-    if(activeGameCode && games[gameCode].begun) {
-      socket.emit(events.GAMEPAD_JOIN_REJECTED, new Reason('Game already began.'));
-      return;
-    }
+    var reconnect = player && !player.connected;
 
     //setup
-    socket.join(gameCode);
     socket.gameCode = gameCode;
     socket.displayName = displayName;
     if(reconnect) {
@@ -109,12 +101,16 @@ io.on(events.CONNECTION, function(socket) {
       var playerReconnect = new GamepadConnect(gameCode, displayName);
       backendSocket.emit(events.GAMEPAD_RECONNECTED, playerReconnect);
       logger.log('Gamepad Reconnected. Backend notified.');
-    } else {
+    } else if(games[gameCode] && games[gameCode].begun) {//trying to join after game started
+      socket.emit(events.GAMEPAD_JOIN_REJECTED, new Reason('Game already began.'));
+      return;
+    } else {//new join
       games[gameCode].players.push(new Player(data.name));
       //let everyone know a player has joined
       io.to(gameCode).emit(events.STATE_UPDATE, games[gameCode]);
       logger.log('Gamepad Joined. Update sent to everyone.', games[gameCode]);
     }
+    socket.join(gameCode);
 
     //Begin Game
     socket.on(events.BEGIN_GAME, function() {
