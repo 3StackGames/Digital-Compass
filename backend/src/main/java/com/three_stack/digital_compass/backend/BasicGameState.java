@@ -92,6 +92,16 @@ public abstract class BasicGameState {
     public void setPlayers(List<BasicPlayer> players) {
         this.players = players;
     }
+    
+    public BasicPlayer getPlayerByName(String displayName) {
+    	for (BasicPlayer player : players) {
+    		if (player.getDisplayName().equals(displayName)) {
+    			return player;
+    		}
+    	}
+    	
+    	return null;
+    }
 
     enum Action {
         DISPLAY, GAMEPAD, SERVER
