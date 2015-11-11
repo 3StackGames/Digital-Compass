@@ -98,6 +98,7 @@ io.on(events.CONNECTION, function(socket) {
     socket.displayName = displayName;
     if(reconnect) {
       player.connected = true;
+      socket.join(gameCode);
       var playerReconnect = new GamepadConnect(gameCode, displayName);
       backendSocket.emit(events.GAMEPAD_RECONNECTED, playerReconnect);
       logger.log('Gamepad Reconnected. Backend notified.');
@@ -105,12 +106,13 @@ io.on(events.CONNECTION, function(socket) {
       socket.emit(events.GAMEPAD_JOIN_REJECTED, new Reason('Game already began.'));
       return;
     } else {//new join
+      socket.join(gameCode);
       games[gameCode].players.push(new Player(data.name));
       //let everyone know a player has joined
       io.to(gameCode).emit(events.STATE_UPDATE, games[gameCode]);
       logger.log('Gamepad Joined. Update sent to everyone.', games[gameCode]);
     }
-    socket.join(gameCode);
+
 
     //Begin Game
     socket.on(events.BEGIN_GAME, function() {
