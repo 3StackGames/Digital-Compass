@@ -8,6 +8,7 @@ var Game = require('./game.js');
 var Player = require('./player.js');
 var DisplayConnect = require('./display-connect.js');
 var GamepadConnect = require('./gamepad-connect.js');
+var Reason = require('./reason.js');
 var logger = require('./logger.js');
 logger.enabled = true;
 /*======================
@@ -37,12 +38,17 @@ io.on(events.CONNECTION, function(socket) {
   /*===== DISPLAY ========*/
   socket.on(events.DISPLAY_JOIN, function(data) {
     //setup
-    var reconnect;
-    if(data !== null && data !== undefined && data.gameCode !== null && data.gameCode !== undefined) {
-      reconnect = data.gameCode.length == 4 && games[data.gameCode] !== null && !games[data.gameCode].displayConnected;
-    } else {
-      reconnect = false;
+    //check if it's a reconnect or if a display is already connected
+    var reconnect = false;
+    var activeGameCode = false;
+    if(data && data.gameCode) {
+      activeGameCode = data.gameCode.length == 4 && games[data.gameCode];
+      reconnect = activeGameCode && !games[data.gameCode].displayConnected;
+    } else if(activeGameCode && !reconnect) {
+      socket.emit(events.DISPLAY_JOIN_REJECTED, new Reason('A display is already connected.'));
+      return;
     }
+
     var gameCode = null;
     if(reconnect) {
       gameCode = data.gameCode;
@@ -79,29 +85,39 @@ io.on(events.CONNECTION, function(socket) {
 
   /*===== GAMEPAD ========*/
   socket.on(events.GAMEPAD_JOIN, function(data) {
+    if(!data || !data.gameCode) {
+      socket.emit(events.GAMEPAD_JOIN_REJECTED, new Reason('No data sent.'))
+    }
     var gameCode = data.gameCode;
     var displayName = data.name;
     var player = getPlayer(gameCode, displayName);
-    var reconnect = player !== null && !player.connected;
+    var reconnect = player && !player.connected;
+
     //setup
-    socket.join(gameCode);
     socket.gameCode = gameCode;
     socket.displayName = displayName;
     if(reconnect) {
       player.connected = true;
+      socket.join(gameCode);
       var playerReconnect = new GamepadConnect(gameCode, displayName);
       backendSocket.emit(events.GAMEPAD_RECONNECTED, playerReconnect);
       logger.log('Gamepad Reconnected. Backend notified.');
-    } else {
+    } else if(games[gameCode] && games[gameCode].begun) {//trying to join after game started
+      socket.emit(events.GAMEPAD_JOIN_REJECTED, new Reason('Game already began.'));
+      return;
+    } else {//new join
+      socket.join(gameCode);
       games[gameCode].players.push(new Player(data.name));
       //let everyone know a player has joined
       io.to(gameCode).emit(events.STATE_UPDATE, games[gameCode]);
       logger.log('Gamepad Joined. Update sent to everyone.', games[gameCode]);
     }
 
+
     //Begin Game
     socket.on(events.BEGIN_GAME, function() {
       backendSocket.emit(events.INITIALIZE_GAME, games[socket.gameCode]);
+      games[socket.gameCode].begun = true;
       logger.log('Begin Game Received. Sent Initialize Game to Backend.', games[socket.gameCode]);
     });
 

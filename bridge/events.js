@@ -22,8 +22,14 @@ exports.GAMEPAD_RECONNECTED = 'Gamepad Reconnected';
 exports.DISPLAY_JOIN = 'Display Join';
 //payload: gameCode
 exports.DISPLAY_ACTION_COMPLETE = 'Display Action Complete';
+// ----- EVENTS FOR BAD USER BEHAVIOR -----
+//payload: reason
+exports.DISPLAY_JOIN_REJECTED = 'Display Join Rejected';
 
 /* ===== GAMEPAD ONLY ===== */
 exports.GAMEPAD_JOIN = 'Gamepad Join';
 exports.BEGIN_GAME = 'Begin Game';
 exports.GAMEPAD_INPUT = 'Gamepad Input';
+// ----- EVENTS FOR BAD USER BEHAVIOR -----
+//payload: reason
+exports.GAMEPAD_JOIN_REJECTED = 'Gamepad Join Rejected';
