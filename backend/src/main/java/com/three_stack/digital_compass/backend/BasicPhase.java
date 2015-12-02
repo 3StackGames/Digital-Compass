@@ -8,7 +8,7 @@ public abstract class BasicPhase {
     public void setup(BasicGameState state) { }
 
     //Called after receiving Gamepad Input
-    public abstract BasicGameState processAction(BasicAction action, BasicGameState state);
+    public abstract BasicGameState processAction(BasicAction action, BasicGameState state) throws InvalidInputException;
 
     public BasicPhase() {
         phaseName = this.getClass().getSimpleName();

@@ -50,6 +50,7 @@ public class PhaseManager {
 	public final String GAMEPAD_DISCONNECTED = "Gamepad Disconnected";
 	public final String DISPLAY_ACTION_COMPLETE = "Display Action Complete";
 	public final String STATE_UPDATE = "State Update";
+	public final String ERROR = "Error";
 	public final String SHUTDOWN = "Shutdown";
 	public final String END_GAME = "End Game";
 
@@ -239,20 +240,33 @@ public class PhaseManager {
 		}
 	}
 	
-	private void stateUpdate(JSONObject action, String gameCode, BasicGameState state) {	
-		if(action != null) {
-			BasicPhase currentPhase = state.getCurrentPhase();
-			BasicAction basicAction = (BasicAction) new Gson().fromJson(action.toString(),currentPhase.getAction());
+	private void stateUpdate(JSONObject action, String gameCode, BasicGameState state) {
+		try {
+			if(action != null) {
+				BasicPhase currentPhase = state.getCurrentPhase();
+				BasicAction basicAction = (BasicAction) new Gson().fromJson(action.toString(),currentPhase.getAction());
+				
+				state = currentPhase.processAction(basicAction, state);
+				if (state.getCurrentPhase() != currentPhase) {
+					deleteActions(gameCode);
+					state.setDisplayComplete(false);
+				}
+			}
 			
-			state = currentPhase.processAction(basicAction, state);
-			if (state.getCurrentPhase() != currentPhase) {
-				deleteActions(gameCode);
-				state.setDisplayComplete(false);
+			gameStates.put(gameCode, state);
+			socket.emit(STATE_UPDATE, new Gson().toJson(state));
+		} catch (InvalidInputException e) {
+			try {
+				JSONObject error = new JSONObject();
+				error.append("gameCode", gameCode);
+				error.append("player", action.get("player"));
+				error.append("code", e.getCode());
+				error.append("message", e.getMessage());
+				socket.emit(ERROR, error.toString());
+			} catch (JSONException je) {
+				je.printStackTrace();
 			}
 		}
-		
-		gameStates.put(gameCode, state);
-		socket.emit(STATE_UPDATE, new Gson().toJson(state));	
 	}
 	
 	private void deleteActions(String gameCode) {
