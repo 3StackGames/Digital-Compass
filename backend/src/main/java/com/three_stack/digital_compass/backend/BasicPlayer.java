@@ -15,6 +15,13 @@ public class BasicPlayer {
 	
 	@Expose
 	private boolean connected = true;
+	
+	public BasicPlayer(BasicPlayer other) {
+		this.displayName = other.displayName;
+		this.score = other.score;
+		this.accountName = other.accountName;
+		this.connected = other.connected;
+	}
 
 	public boolean isConnected() {
 		return connected;

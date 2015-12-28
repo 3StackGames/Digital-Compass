@@ -288,6 +288,7 @@ public class PhaseManager {
 	}
 
 	private void createGame(JSONObject details) throws JSONException {
+		//check for players with same name?
 		try {
 			BasicGameState initialState = defaultStateFactory.createState();
 			BasicGameState jsonState = new Gson().fromJson(details.toString(),
