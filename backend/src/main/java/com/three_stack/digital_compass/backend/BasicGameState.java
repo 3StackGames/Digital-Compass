@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BasicGameState {
-    protected BasicPhase currentPhase;
+    protected transient BasicPhase currentPhase;
+    
+    protected String currentPhaseName;
 
     protected String gameCode;
 
@@ -50,10 +52,15 @@ public abstract class BasicGameState {
     public void transitionPhase(BasicPhase currentPhase) {
         this.currentPhase = currentPhase;
         currentPhase.setup(this);
+        currentPhaseName = currentPhase.phaseName;
     }
 
     public BasicPhase getCurrentPhase() {
         return currentPhase;
+    }
+    
+    public String getCurrentPhaseName() {
+    	return currentPhaseName;
     }
 
     /*
@@ -63,6 +70,7 @@ public abstract class BasicGameState {
     @Deprecated
     public void setCurrentPhase(BasicPhase currentPhase) {
         this.currentPhase = currentPhase;
+        currentPhaseName = currentPhase.phaseName;
     }
 
     /**
