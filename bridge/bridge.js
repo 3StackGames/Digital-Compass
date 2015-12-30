@@ -41,17 +41,21 @@ io.on(events.CONNECTION, function(socket) {
     //check if it's a reconnect or if a display is already connected
     var reconnect = false;
     var activeGameCode = false;
-    if(data && data.gameCode) {
-      activeGameCode = data.gameCode.length == 4 && games[data.gameCode];
-      reconnect = activeGameCode && !games[data.gameCode].displayConnected;
+    //set gamecode
+    var gameCode = data.gameCode || null;
+    if(gameCode) {
+        gameCode = gameCode.toUpperCase();
+    }
+    
+    if(data && gameCode) {
+      activeGameCode = gameCode.length == 4 && games[gameCode];
+      reconnect = activeGameCode && !games[gameCode].displayConnected;
     } else if(activeGameCode && !reconnect) {
       socket.emit(events.DISPLAY_JOIN_REJECTED, new Reason('A display is already connected.'));
       return;
     }
 
-    var gameCode = null;
     if(reconnect) {
-      gameCode = data.gameCode;
       games[gameCode].displayConnected = true;
       var displayReconnect = new DisplayConnect(gameCode);
       backendSocket.emit(events.DISPLAY_RECONNECTED, displayReconnect);
@@ -88,7 +92,7 @@ io.on(events.CONNECTION, function(socket) {
     if(!data || !data.gameCode) {
       socket.emit(events.GAMEPAD_JOIN_REJECTED, new Reason('No data sent.'))
     }
-    var gameCode = data.gameCode;
+    var gameCode = data.gameCode.toUpperCase();
     var displayName = data.displayName;
     var accountName = data.accountName;
     var player = getPlayer(gameCode, displayName);
