@@ -26,6 +26,7 @@ public class PhaseManager {
 
 	private Socket socket;
 	private BasicGameStateFactory defaultStateFactory;
+	private BasicPlayerFactory defaultPlayerFactory;
 	private Thread threadManager;
 	private Map<String, BasicGameState> gameStates = new HashMap<String, BasicGameState>();
 	private LinkedBlockingQueue<JSONObject> actionsToProcess = new LinkedBlockingQueue<JSONObject>(MAX_QUEUE_SIZE);
@@ -54,8 +55,9 @@ public class PhaseManager {
 	public final String SHUTDOWN = "Shutdown";
 	public final String END_GAME = "End Game";
 
-	public void initialize(String URI, BasicGameStateFactory defaultStateFactory) {
+	public void initialize(String URI, BasicGameStateFactory defaultStateFactory, BasicPlayerFactory defaultPlayerFactory) {
 		this.defaultStateFactory = defaultStateFactory;
+		this.defaultPlayerFactory = defaultPlayerFactory;
 
 		if (URI != null)
 			connect(URI);
@@ -295,7 +297,7 @@ public class PhaseManager {
 					initialState.getClass());
 
 			String gameCode = jsonState.getGameCode();
-			initialState.setPlayers(jsonState.getPlayers());
+			initialState.setPlayers(defaultPlayerFactory.initialize(jsonState.getPlayers()));
 			initialState.setGameCode(gameCode);
 			
 			stateUpdate(null, gameCode, initialState);
