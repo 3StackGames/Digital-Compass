@@ -296,6 +296,10 @@ public class PhaseManager {
 			BasicGameState jsonState = new Gson().fromJson(details.toString(),
 					initialState.getClass());
 
+			//gameCode
+			//players
+			//displayConnected
+			//begun
 			String gameCode = jsonState.getGameCode();
 			initialState.setPlayers(defaultPlayerFactory.initialize(jsonState.getPlayers()));
 			initialState.setGameCode(gameCode);
