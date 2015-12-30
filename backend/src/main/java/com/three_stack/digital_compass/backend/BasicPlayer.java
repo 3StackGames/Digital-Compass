@@ -23,6 +23,10 @@ public class BasicPlayer {
 		this.connected = other.connected;
 	}
 
+	public boolean isAuthenticated() {
+		return accountName != null && accountName.length() > 0;
+	}
+
 	public boolean isConnected() {
 		return connected;
 	}
