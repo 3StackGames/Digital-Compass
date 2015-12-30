@@ -42,9 +42,9 @@ io.on(events.CONNECTION, function(socket) {
     var reconnect = false;
     var activeGameCode = false;
     //set gamecode
-    var gameCode = data.gameCode || null;
-    if(gameCode) {
-        gameCode = gameCode.toUpperCase();
+    var gameCode = null;
+    if(data && data.gameCode) {
+        gameCode = data.gameCode.toUpperCase();
     }
     
     if(data && gameCode) {
