@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BasicGameState {
-    protected BasicPhase currentPhase;
+    protected transient BasicPhase currentPhase;
 
     protected String gameCode;
 
