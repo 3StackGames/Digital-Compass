@@ -89,7 +89,8 @@ io.on(events.CONNECTION, function(socket) {
       socket.emit(events.GAMEPAD_JOIN_REJECTED, new Reason('No data sent.'))
     }
     var gameCode = data.gameCode;
-    var displayName = data.name;
+    var displayName = data.displayName;
+    var accountName = data.accountName;
     var player = getPlayer(gameCode, displayName);
     var reconnect = player && !player.connected;
 
@@ -107,7 +108,7 @@ io.on(events.CONNECTION, function(socket) {
       return;
     } else {//new join
       socket.join(gameCode);
-      games[gameCode].players.push(new Player(data.name));
+      games[gameCode].players.push(new Player(displayName, accountName));
       //let everyone know a player has joined
       io.to(gameCode).emit(events.STATE_UPDATE, games[gameCode]);
       logger.log('Gamepad Joined. Update sent to everyone.', games[gameCode]);
