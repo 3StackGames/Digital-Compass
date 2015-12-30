@@ -1,4 +1,7 @@
-# Created by https://www.gitignore.io/api/osx,windows,node
+# Created by https://www.gitignore.io/api/osx,windows,node,visualstudiocode
+
+### VisualStudioCode ###
+.vscode
 
 ### OSX ###
 .DS_Store

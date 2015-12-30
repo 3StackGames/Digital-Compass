@@ -90,7 +90,8 @@ io.on(events.CONNECTION, function(socket) {
   /*===== GAMEPAD ========*/
   socket.on(events.GAMEPAD_JOIN, function(data) {
     if(!data || !data.gameCode) {
-      socket.emit(events.GAMEPAD_JOIN_REJECTED, new Reason('No data sent.'))
+      socket.emit(events.GAMEPAD_JOIN_REJECTED, new Reason('No data sent.'));
+      return;
     }
     var gameCode = data.gameCode.toUpperCase();
     var displayName = data.displayName;
@@ -104,13 +105,25 @@ io.on(events.CONNECTION, function(socket) {
     if(reconnect) {
       player.connected = true;
       socket.join(gameCode);
-      var playerReconnect = new GamepadConnect(gameCode, displayName);
-      backendSocket.emit(events.GAMEPAD_RECONNECTED, playerReconnect);
-      logger.log('Gamepad Reconnected. Backend notified.');
+      //handle reconnect for before and after game has begun
+      if(games[gameCode] && games[gameCode].begun) {
+        var playerReconnect = new GamepadConnect(gameCode, displayName);
+        backendSocket.emit(events.GAMEPAD_RECONNECTED, playerReconnect);
+        logger.log('Gamepad Reconnected. Backend notified.');
+      } else {
+        io.to(gameCode).emit(events.STATE_UPDATE, games[gameCode]);
+        logger.log('Gamepad Reconnected. Update sent to everyone.', games[gameCode]);
+      }
+      
     } else if(games[gameCode] && games[gameCode].begun) {//trying to join after game started
       socket.emit(events.GAMEPAD_JOIN_REJECTED, new Reason('Game already began.'));
       return;
     } else {//new join
+      //check if name is already taken
+      if(player) {
+        socket.emit(events.GAMEPAD_JOIN_REJECTED, new Reason("Username already taken"));
+        return;
+      }
       socket.join(gameCode);
       games[gameCode].players.push(new Player(displayName, accountName));
       //let everyone know a player has joined
@@ -151,7 +164,7 @@ var getPlayer = function(gameCode, displayName) {
   if(!games[gameCode]) return null;
   var players = games[gameCode].players;
   for(var i = 0; i < players.length; i++) {
-    if(players[i].displayName == displayName) {
+    if(players[i].displayName.toLowerCase() == displayName.toLowerCase()) {
       return players[i];
     }
   }
