@@ -8,6 +8,7 @@ public abstract class BasicPhase {
     public void setup(BasicGameState state) { }
 
     //Called after receiving Gamepad Input
+    //Should never return null
     public abstract BasicGameState processAction(BasicAction action, BasicGameState state) throws InvalidInputException;
 
     public BasicPhase() {
