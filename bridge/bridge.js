@@ -94,7 +94,7 @@ io.on(events.CONNECTION, function(socket) {
       return;
     }
     var gameCode = data.gameCode.toUpperCase();
-    var displayName = data.displayName;
+    var displayName = data.displayName.toLowerCase();
     var accountName = data.accountName;
     var player = getPlayer(gameCode, displayName);
     var reconnect = player && !player.connected;
