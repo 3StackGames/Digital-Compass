@@ -250,7 +250,11 @@ public class PhaseManager {
 				BasicAction basicAction = (BasicAction) new Gson().fromJson(action.toString(),currentPhase.getAction());
 				
 				state = currentPhase.processAction(basicAction, state);
-				if (state.getCurrentPhase() != currentPhase) {
+				if(state == null) {
+					System.out.println("processAction should not return null. Please fix");
+					return;
+				}
+				else if (state.getCurrentPhase() != currentPhase) {
 					deleteActions(gameCode);
 					state.setDisplayComplete(false);
 				}
