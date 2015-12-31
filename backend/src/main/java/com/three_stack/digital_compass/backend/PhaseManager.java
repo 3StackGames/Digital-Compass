@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -23,6 +25,7 @@ import com.google.gson.Gson;
 public class PhaseManager {
 
 	public final int MAX_QUEUE_SIZE = 10000;
+	public final int THREAD_POOL_SIZE = 8;
 
 	private Socket socket;
 	private BasicGameStateFactory defaultStateFactory;
@@ -34,8 +37,6 @@ public class PhaseManager {
 	private boolean running = false;
 
 	private Vector<ProcessAction> threads = new Vector<ProcessAction>();
-	private Lock threadLock = new ReentrantLock();
-	private Condition threadSignal = threadLock.newCondition();
 	private Lock actionLock = new ReentrantLock();
 	private Condition actionSignal = actionLock.newCondition();
 
@@ -173,7 +174,7 @@ public class PhaseManager {
 		});
 		socket.connect();
 
-		threadManager = new Thread(new ThreadManager());
+		threadManager = new Thread(new ThreadManager(THREAD_POOL_SIZE));
 		threadManager.start();
 	}
 	
@@ -249,7 +250,11 @@ public class PhaseManager {
 				BasicAction basicAction = (BasicAction) new Gson().fromJson(action.toString(),currentPhase.getAction());
 				
 				state = currentPhase.processAction(basicAction, state);
-				if (state.getCurrentPhase() != currentPhase) {
+				if(state == null) {
+					System.out.println("processAction should not return null. Please fix");
+					return;
+				}
+				else if (state.getCurrentPhase() != currentPhase) {
 					deleteActions(gameCode);
 					state.setDisplayComplete(false);
 				}
@@ -331,57 +336,67 @@ public class PhaseManager {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			} finally {
-				threads.remove(this);
-				threadLock.lock();
-				threadSignal.signalAll();
-				threadLock.unlock();
+				synchronized (gamesBeingProcessed) {
+					gamesBeingProcessed.remove(gameCode);
+				}
+				synchronized(threads) {
+					threads.remove(this);
+				}
 			}
 		}
 	}
 
 	private class ThreadManager implements Runnable {
 
-		private final int MAX_THREADS = 16;
+		private final ThreadPoolExecutor threadPool;
+		
+		public ThreadManager(int size) {
+			threadPool = new ThreadPoolExecutor(size, size,
+					0L, TimeUnit.MILLISECONDS,
+					new LinkedBlockingQueue<Runnable>(),
+					new ThreadPoolExecutor.DiscardPolicy());
+		}
 
 		public void run() {
 			while (true) {
 				try {
-					if (threads.size() < MAX_THREADS) {
-						ProcessAction newThread = null;
-						synchronized(actionsToProcess) {						
-							for (JSONObject action : actionsToProcess) {
-								String gameCode = extractGameCode(action);
-								if(!gamesBeingProcessed.contains(gameCode)) {
-									synchronized(gamesBeingProcessed) {
-										gamesBeingProcessed.add(gameCode);
-									}
-									actionsToProcess.remove(action);
-									newThread = new ProcessAction(action);
-									break;
+					ProcessAction newThread = null;
+					synchronized(actionsToProcess) {						
+						for (JSONObject action : actionsToProcess) {
+							String gameCode = extractGameCode(action);
+							if(!gamesBeingProcessed.contains(gameCode)) {
+								synchronized(gamesBeingProcessed) {
+									gamesBeingProcessed.add(gameCode);
 								}
+								actionsToProcess.remove(action);
+								newThread = new ProcessAction(action);
+								break;
 							}
 						}
-						if (newThread == null) {
-							if (gamesBeingProcessed.isEmpty()) {
-								newThread = new ProcessAction(actionsToProcess.take());
-								threads.add(newThread);
-								newThread.start();
-							} else {
-								actionLock.lock();
-								actionSignal.await();
-								actionLock.unlock();
-							}
+					}
+					if (newThread == null) {
+						if (gamesBeingProcessed.isEmpty()) {
+							newThread = new ProcessAction(actionsToProcess.take());
+							addThread(newThread);
+						} else {
+							actionLock.lock();
+							actionSignal.await();
+							actionLock.unlock();
 						}
 					} else {
-						threadLock.lock();
-						System.out.println("max threads reached");
-						threadSignal.await();
-						threadLock.unlock();
+						addThread(newThread);
 					}
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
+		}
+		
+		public void addThread(ProcessAction t) {
+			synchronized(threads) {
+				threads.add(t);
+			}
+			threadPool.submit(t);
 		}
 	}
 }
