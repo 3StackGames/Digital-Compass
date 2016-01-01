@@ -5,7 +5,7 @@ public abstract class BasicPhase {
     protected String phaseName;
 
     //Called before State Updates to clients
-    public void setup(BasicGameState state) { }
+    public abstract void setup(BasicGameState state) throws InvalidInputException;
 
     //Called after receiving Gamepad Input
     //Should never return null
