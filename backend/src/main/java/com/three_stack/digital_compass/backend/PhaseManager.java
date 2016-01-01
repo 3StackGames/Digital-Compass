@@ -253,21 +253,22 @@ public class PhaseManager {
 				System.out.println("processAction should not return null. Please fix");
 				return;
 			}
-			else if (state instanceof BasicErrorState) {
-				try {
-					JSONObject errorState = new JSONObject(new Gson().toJson(state));
-					errorState.append("gameCode", gameCode);
-					errorState.append("player", action.get("player"));
-					socket.emit(ERROR, errorState.toString());
-				} catch (JSONException e) {
-					e.printStackTrace();
-				} 
-				return;
-			}
-			else if (state.getCurrentPhase() != currentPhase) {
+			else if (state.getCurrentPhase() != currentPhase && !(state instanceof BasicErrorState)) {
 				deleteActions(gameCode);
 				state.setDisplayComplete(false);
 			}
+		}
+		
+		if (state instanceof BasicErrorState) {
+			try {
+				JSONObject errorState = new JSONObject(new Gson().toJson(state));
+				errorState.append("gameCode", gameCode);
+				errorState.append("player", action.get("player"));
+				socket.emit(ERROR, errorState.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			} 
+			return;
 		}
 		
 		gameStates.put(gameCode, state);
