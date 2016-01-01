@@ -49,7 +49,7 @@ public abstract class BasicGameState {
     /*
      * sets the current phase and runs any pre-methods
      */
-    public void transitionPhase(BasicPhase currentPhase) throws InvalidInputException {
+    public void transitionPhase(BasicPhase currentPhase) {
         this.currentPhase = currentPhase;
         currentPhase.setup(this);
         currentPhaseName = currentPhase.phaseName;
