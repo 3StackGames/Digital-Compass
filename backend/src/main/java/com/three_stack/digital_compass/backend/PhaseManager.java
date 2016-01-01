@@ -244,36 +244,34 @@ public class PhaseManager {
 	}
 	
 	private void stateUpdate(JSONObject action, String gameCode, BasicGameState state) {
-		try {
-			if(action != null) {
-				BasicPhase currentPhase = state.getCurrentPhase();
-				BasicAction basicAction = (BasicAction) new Gson().fromJson(action.toString(),currentPhase.getAction());
-				
-				state = currentPhase.processAction(basicAction, state);
-				if(state == null) {
-					System.out.println("processAction should not return null. Please fix");
-					return;
-				}
-				else if (state.getCurrentPhase() != currentPhase) {
-					deleteActions(gameCode);
-					state.setDisplayComplete(false);
-				}
-			}
+		if(action != null) {
+			BasicPhase currentPhase = state.getCurrentPhase();
+			BasicAction basicAction = (BasicAction) new Gson().fromJson(action.toString(),currentPhase.getAction());
 			
-			gameStates.put(gameCode, state);
-			socket.emit(STATE_UPDATE, new Gson().toJson(state));
-		} catch (InvalidInputException e) {
-			try {
-				JSONObject error = new JSONObject();
-				error.append("gameCode", gameCode);
-				error.append("player", action.get("player"));
-				error.append("code", e.getCode());
-				error.append("message", e.getMessage());
-				socket.emit(ERROR, error.toString());
-			} catch (JSONException je) {
-				je.printStackTrace();
+			state = currentPhase.processAction(basicAction, state);
+			if(state == null) {
+				System.out.println("processAction should not return null. Please fix");
+				return;
+			}
+			else if (state instanceof BasicErrorState) {
+				try {
+					JSONObject errorState = new JSONObject(new Gson().toJson(state));
+					errorState.append("gameCode", gameCode);
+					errorState.append("player", action.get("player"));
+					socket.emit(ERROR, errorState.toString());
+				} catch (JSONException e) {
+					e.printStackTrace();
+				} 
+				return;
+			}
+			else if (state.getCurrentPhase() != currentPhase) {
+				deleteActions(gameCode);
+				state.setDisplayComplete(false);
 			}
 		}
+		
+		gameStates.put(gameCode, state);
+		socket.emit(STATE_UPDATE, new Gson().toJson(state));
 	}
 	
 	private void deleteActions(String gameCode) {

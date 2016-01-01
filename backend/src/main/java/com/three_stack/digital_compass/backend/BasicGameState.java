@@ -6,7 +6,7 @@ import java.util.List;
 public abstract class BasicGameState {
     protected transient BasicPhase currentPhase;
     
-    protected String currentPhaseName;
+    private String currentPhaseName; //only for gson
 
     protected String gameCode;
 
@@ -15,6 +15,10 @@ public abstract class BasicGameState {
     protected boolean displayComplete = false;
     
     protected boolean displayConnected = true;
+
+	public BasicGameState() {
+
+    }
 
     public boolean isDisplayConnected() {
 		return displayConnected;
@@ -32,10 +36,6 @@ public abstract class BasicGameState {
 		this.displayComplete = displayComplete;
 	}
 
-	public BasicGameState() {
-
-    }
-
     public void resetGame() {
         resetPlayerScores();
     }
@@ -46,31 +46,16 @@ public abstract class BasicGameState {
         }
     }
 
-    /*
-     * sets the current phase and runs any pre-methods
-     */
-    public void transitionPhase(BasicPhase currentPhase) {
-        this.currentPhase = currentPhase;
-        currentPhase.setup(this);
-        currentPhaseName = currentPhase.phaseName;
-    }
-
     public BasicPhase getCurrentPhase() {
         return currentPhase;
     }
-    
-    public String getCurrentPhaseName() {
-    	return currentPhaseName;
-    }
 
-    /*
-     * @deprecated
-     * Use transitionPhase() instead, since it calls the setup method.
-     */
-    @Deprecated
     public void setCurrentPhase(BasicPhase currentPhase) {
         this.currentPhase = currentPhase;
-        currentPhaseName = currentPhase.phaseName;
+    }
+    
+    public String getCurrentPhaseName() {
+    	return currentPhase.getPhaseName();
     }
 
     /**
